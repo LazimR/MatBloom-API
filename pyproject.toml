@@ -6,13 +6,19 @@ authors = [
     {name = "LazimR",email = "lrodrigues356@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11, <4"
 dependencies = [
     "fastapi (>=0.115.11,<0.116.0)",
     "uvicorn (>=0.34.0,<0.35.0)",
     "sqlalchemy (>=2.0.39,<3.0.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
-    "pydantic (>=2.10.6,<3.0.0)"
+    "pydantic (>=2.10.6,<3.0.0)",
+    "reportlab (>=4.3.1,<5.0.0)",
+    "weasyprint (>=65.0,<66.0)",
+    "pypdf2 (>=3.0.1,<4.0.0)",
+    "numpy (>=2.2.4,<3.0.0)",
+    "opencv-python (>=4.11.0.86,<5.0.0.0)",
+    "pytesseract (>=0.3.13,<0.4.0)"
 ]
 
 
