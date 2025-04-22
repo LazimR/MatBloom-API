@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends
 from app.api.endpoints import content
+from app.api.endpoints import test
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -8,7 +9,8 @@ from app.db.models.connection import get_session
 app = FastAPI()
 
 # Inclui os endpoints de conteúdo
-app.include_router(content.router, prefix="/api", tags=["contents"])
+app.include_router(content.router, prefix="", tags=["contents"])
+app.include_router(test.router, prefix="", tags=["tests"])
 
 @app.get("/")
 def read_root():

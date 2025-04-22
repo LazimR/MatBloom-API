@@ -28,7 +28,7 @@ INSERT INTO question (id, enunciation, itens, correct_item, level, contents) VAL
 (12, 'Implemente um algoritmo que calcule a potência de um número base elevado a um expoente n (baseⁿ).', ARRAY['função com loop multiplicando', 'somar base n vezes', 'multiplicar base por n', 'usar raiz quadrada'], 0, 6, ARRAY[]::VARCHAR[]);
 
 -- Criar teste
-INSERT INTO test (id) VALUES (1);
+INSERT INTO test (id, name) VALUES (1,'Teste de Potências e Radiciação');
 
 -- Relacionar questões ao teste
 INSERT INTO test_question (test_id, question_id) VALUES

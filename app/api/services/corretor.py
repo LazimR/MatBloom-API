@@ -16,14 +16,26 @@ def corrigir(nome_do_arquivo, gabarito:list = None, numero_questoes=NUMERO_QUEST
     img = cv2.resize(img, (1512, 2016))
     img_copy = img.copy()
 
-    roi_id = img[0:200, 0:600]  # Ajuste as coordenadas para a região onde o ID está localizado
-    texto_extraido = pt.image_to_string(roi_id, lang='eng')  # Extrai o texto da região
+    # Melhorando a região de interesse para o ID
+    #roi_id = img[0:400, 0:1200]  # Ajuste as coordenadas para uma região mais provável, funciona apenas em scanner
+    # Pré-processamento para melhorar o OCR
+    roi_id_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    roi_id_thresh = cv2.threshold(roi_id_gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+    
+    # Configurações específicas para o OCR
+    config = '--psm 6 --oem 3 -c tessedit_char_whitelist=0123456789ID:'
+    texto_extraido = pt.image_to_string(roi_id_thresh, lang='eng', config=config)
+
     id_aluno = None
 
     # Procurar pelo padrão "ID: x" no texto extraído
     for linha in texto_extraido.splitlines():
+        linha = linha.strip().upper()  # Normaliza para minúsculas
         if "ID:" in linha:
-            id_aluno = linha.split("ID:")[-1].strip()  # Extrai o valor após "ID:"
+            # Extrai o valor após "ID:" e remove caracteres não numéricos
+            id_str = linha.split("id:")[-1].strip()
+            # Filtra apenas dígitos
+            id_aluno = ''.join(filter(str.isdigit, id_str))
             break
 
     # Pre Processamentos
@@ -64,6 +76,8 @@ def corrigir(nome_do_arquivo, gabarito:list = None, numero_questoes=NUMERO_QUEST
 
     respostas = []
     pontuacao = 0
+    questoes_erradas = []
+
     for indice_linha, linha in enumerate(img_linhas):
         maior_pixels = 0
         indice_marcado = -1
@@ -87,8 +101,13 @@ def corrigir(nome_do_arquivo, gabarito:list = None, numero_questoes=NUMERO_QUEST
         alternativa_em_letra = utils.ober_alternativa_pelo_indice(
             indice_marcado)
         respostas.append(alternativa_em_letra)
-        if (len(gabarito) == numero_questoes and indice_marcado == utils.obter_indice_da_alternativa(gabarito[indice_linha])):
-            pontuacao += 1
+        
+        if len(gabarito) == numero_questoes:
+            if indice_marcado == utils.obter_indice_da_alternativa(gabarito[indice_linha]):
+                pontuacao += 1
+            else:
+                # Adiciona a questão errada à lista
+                questoes_erradas.append(indice_linha + 1)
 
     if DEBUGAR:
         # Imagem binária deve ter o retângulo das questões bem destacado e as opções marcadas também
@@ -104,7 +123,7 @@ def corrigir(nome_do_arquivo, gabarito:list = None, numero_questoes=NUMERO_QUEST
         print("FIM Debug \n\n\n")
         cv2.waitKey(0)
 
-    return respostas, pontuacao, id_aluno
+    return respostas, pontuacao, id_aluno, questoes_erradas
 
 
 # Experiência padrão de gabarito, configurar NUMERO_QUESTOES = 10 e NUMERO_ALTERNATIVAS = 5
@@ -126,10 +145,10 @@ def corrigir(nome_do_arquivo, gabarito:list = None, numero_questoes=NUMERO_QUEST
 # arquivos_a_serem_corrigidos = glob.glob("diagnosticos/25*")
 
 if __name__ == "__main__":
-    arquivo = 'C:/Users/LazimR/Documents/GitHub/MatBloom/MatBloom-API/app/api/services/Lazim.png'
-    respostas, pontuacao, id = corrigir(arquivo)
+    arquivo = 'C:/Users/LazimR/Documents/GitHub/MatBloom/MatBloom-API/app/api/services/gabarito1.jpg'
+    respostas, pontuacao, id, questoes_erradas = corrigir(arquivo, ['a','b','c','d','d'],5,4)
     nome_do_estudante = arquivo.replace(
         "gabaritos/", "").replace(".jpg", "").replace(".png", "").replace(".jpeg", "")
     print("Estudante: ", nome_do_estudante, "Respostas: ",
-          respostas, "Nota: ", pontuacao, "/ 10")
+          respostas, "Nota: ", pontuacao, "/ 10", "Questões erradas: ", questoes_erradas)
     print("ID: ", id)

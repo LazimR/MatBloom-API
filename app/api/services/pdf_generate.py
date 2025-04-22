@@ -1,16 +1,14 @@
+from io import BytesIO
+import os
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
+from reportlab.lib.units import inch, mm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
-from reportlab.lib import colors
-from reportlab.platypus import Table, TableStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
-from reportlab.lib.colors import black
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
 
-def pdf_test_generate(out_path: str, test_name: str, questions: list, student_name: str, student_id: str = None):
+def pdf_test_generate(test_name: str, questions: list, student_name: str, student_id: str = None):
     """
     Gera um PDF com a prova para o aluno e um gabarito separado
     
@@ -21,14 +19,18 @@ def pdf_test_generate(out_path: str, test_name: str, questions: list, student_na
         student_name: Nome do aluno
         student_id: ID do aluno
     """
-    doc = SimpleDocTemplate(out_path, pagesize=letter)
+    pdfmetrics.registerFont(TTFont('Arial', 'app/api/dependencies/ARIAL.TTF'))
+    pdfmetrics.registerFont(TTFont('Arial-Bold', 'app/api/dependencies/ARIALBD.TTF'))
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
     styles = getSampleStyleSheet()
     
     # Estilos customizados
     styles.add(ParagraphStyle(
         name='QuestionTitle',
         parent=styles['Normal'],
-        fontName='Helvetica-Bold',
+        fontName='Arial-Bold',
         fontSize=12,
         spaceAfter=6
     ))
@@ -36,8 +38,8 @@ def pdf_test_generate(out_path: str, test_name: str, questions: list, student_na
     styles.add(ParagraphStyle(
         name='QuestionText',
         parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=10,
+        fontName='Arial',
+        fontSize=11,
         leading=14,
         spaceAfter=12
     ))
@@ -45,8 +47,8 @@ def pdf_test_generate(out_path: str, test_name: str, questions: list, student_na
     styles.add(ParagraphStyle(
         name='ItemText',
         parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=10,
+        fontName='Arial',
+        fontSize=11,
         leftIndent=12,
         spaceAfter=6
     ))
@@ -56,7 +58,7 @@ def pdf_test_generate(out_path: str, test_name: str, questions: list, student_na
     
     # Cabeçalho da prova
     story.append(Paragraph(test_name, styles['Title']))
-    story.append(Paragraph(f"Aluno: {student_name}  ID: {student_id}", styles['Normal']))
+    story.append(Paragraph(f"Aluno: {student_name}  ID: {student_id}", styles['QuestionTitle']))
     story.append(Spacer(1, 0.5 * inch))
     
     # Adiciona questões
@@ -70,21 +72,21 @@ def pdf_test_generate(out_path: str, test_name: str, questions: list, student_na
         
         story.append(Spacer(1, 0.2 * inch))
         
-        # Adiciona quebra de página automática a cada 5 questões
-        if i % 5 == 0:
-            story.append(PageBreak())
 
     # Gera o PDF
     doc.build(story)
+
+    buffer.seek(0)
+
+    return buffer
 
 
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
-from reportlab.lib.colors import black
 
-def generate_answer_sheet(out_path: str, student_name: str, student_id: str, num_questions: int = 10, num_itens: int = 5):
+def generate_answer_sheet(student_name: str, student_id: str, num_questions: int = 10, num_itens: int = 5):
     """
     Gera um gabarito idêntico ao template fornecido
     
@@ -93,7 +95,8 @@ def generate_answer_sheet(out_path: str, student_name: str, student_id: str, num
         student_name: Nome do aluno
         num_questions: Número total de questões (padrão 10)
     """
-    c = canvas.Canvas(out_path, pagesize=letter)
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
     
     box_width = 40*num_itens  # Largura da caixa
@@ -132,8 +135,9 @@ def generate_answer_sheet(out_path: str, student_name: str, student_id: str, num
     
     
     c.showPage()  # Finaliza a página 2
-    
     c.save()
+    buffer.seek(0)  # Move o ponteiro para o início do buffer
+    return buffer
 
 if __name__ == '__main__':
     pdf_test_generate("prova_aluno.pdf", "Prova de Matemática", [
