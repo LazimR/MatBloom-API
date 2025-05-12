@@ -4,15 +4,25 @@ import cv2
 import numpy as np
 import utils
 import pytesseract as pt
+from io import BytesIO
 
 DEBUGAR = False
 gabarito = ["a", "b", "c", "d", "e", "a", "b", "c", "d", "e"]
 NUMERO_QUESTOES = 10
 NUMERO_ALTERNATIVAS = 5
 
-def corrigir(nome_do_arquivo, gabarito:list = None, numero_questoes=NUMERO_QUESTOES, numero_alternativas=NUMERO_ALTERNATIVAS):
-    img = cv2.imread(nome_do_arquivo)
+def corrigir(arquivo: BytesIO, gabarito:list = None, numero_questoes=NUMERO_QUESTOES, numero_alternativas=NUMERO_ALTERNATIVAS):
+    arquivo.seek(0)
+    
+    number_to_letter = lambda number: chr(number + 65)    
+
+    nome_do_arquivo = np.asarray(bytearray(arquivo.read()), dtype=np.uint8)
+
+    img = cv2.imdecode(nome_do_arquivo, cv2.IMREAD_COLOR)
     # Redimensiona a imagem para um tamanho padrão 3:4
+    if img is None:
+        raise ValueError("A imagem não pôde ser carregada. Verifique o arquivo.")
+
     img = cv2.resize(img, (1512, 2016))
     img_copy = img.copy()
 
@@ -103,7 +113,7 @@ def corrigir(nome_do_arquivo, gabarito:list = None, numero_questoes=NUMERO_QUEST
         respostas.append(alternativa_em_letra)
         
         if len(gabarito) == numero_questoes:
-            if indice_marcado == utils.obter_indice_da_alternativa(gabarito[indice_linha]):
+            if indice_marcado == utils.obter_indice_da_alternativa(number_to_letter(gabarito[indice_linha])):
                 pontuacao += 1
             else:
                 # Adiciona a questão errada à lista
@@ -123,26 +133,14 @@ def corrigir(nome_do_arquivo, gabarito:list = None, numero_questoes=NUMERO_QUEST
         print("FIM Debug \n\n\n")
         cv2.waitKey(0)
 
-    return respostas, pontuacao, id_aluno, questoes_erradas
+    letter_to_number = lambda letter: ord(letter.upper()) - 65
+
+    for i,resposta in enumerate(respostas):
+        respostas[i] = letter_to_number(resposta)
 
 
-# Experiência padrão de gabarito, configurar NUMERO_QUESTOES = 10 e NUMERO_ALTERNATIVAS = 5
-#arquivos_a_serem_corrigidos = glob.glob("gabaritos/*")
+    return [respostas, pontuacao, id_aluno, questoes_erradas]
 
-# Experiência de diagnóstico com 7 linhas, configurar NUMERO_QUESTOES = 7 e NUMERO_ALTERNATIVAS = 3
-# NUMERO_QUESTOES = 7
-# NUMERO_ALTERNATIVAS = 3
-# arquivos_a_serem_corrigidos = glob.glob("diagnosticos/7*")
-
-# Experiência de diagnóstico com 14 linhas, configurar NUMERO_QUESTOES = 7 e NUMERO_ALTERNATIVAS = 3
-# NUMERO_QUESTOES = 14
-# NUMERO_ALTERNATIVAS = 3
-# arquivos_a_serem_corrigidos = glob.glob("diagnosticos/14*")
-
-
-# NUMERO_QUESTOES = 25
-# NUMERO_ALTERNATIVAS = 3
-# arquivos_a_serem_corrigidos = glob.glob("diagnosticos/25*")
 
 if __name__ == "__main__":
     arquivo = 'C:/Users/LazimR/Documents/GitHub/MatBloom/MatBloom-API/app/api/services/gabarito1.jpg'

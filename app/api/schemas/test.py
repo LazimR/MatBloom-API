@@ -43,8 +43,8 @@ class Test(TestBase):
             - questions: List[Question] - Lista de questões associadas ao teste.
     """
     id: int
-    name: str
-    questions: List[Question]
+    #name: str
+    #questions: List[Question]
 
     model_config = {
         "from_attributes": True

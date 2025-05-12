@@ -34,7 +34,7 @@ class TestRepository:
                 - test_id: int - ID do teste a ser retornado.
 
             return:
-                - list_questions: list[Question] - Lista de questões associadas ao teste.
+                - TestSchema- Um schema de test.
 
         """
         

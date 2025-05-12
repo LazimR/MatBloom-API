@@ -77,7 +77,7 @@ class TestResponse(Base):
     student_id: Mapped[int] = mapped_column(Integer, ForeignKey("student.id"), nullable=False)
     score: Mapped[float] = mapped_column(Float, nullable=True)  # Nota da prova
     responses: Mapped[list[int]] = mapped_column(ARRAY(Integer), nullable=False)  # Respostas do aluno
-
+    wrong_questions: Mapped[list[int]] = mapped_column(ARRAY(Integer), nullable=True)  # Questões erradas
     # Relacionamentos
     test: Mapped["Test"] = relationship("Test", back_populates="test_responses")
     student: Mapped["Student"] = relationship("Student", back_populates="test_responses")
