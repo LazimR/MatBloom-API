@@ -83,6 +83,25 @@ class TestResponse(Base):
     student: Mapped["Student"] = relationship("Student", back_populates="test_responses")
 
 
+class User(Base):
+    __tablename__ = "user"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    password: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    classes: Mapped[list["Classroom"]] = relationship("Classroom", back_populates="user")
+
+class Classroom(Base):
+    __tablename__ = "classroom"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+
+    # Relacionamento com Student (opcional, se você quiser acessar os alunos da sala)
+    students: Mapped[list["Student"]] = relationship("Student", back_populates="classroom")
+
+
 def create_entities(engine) -> bool:
     """
     Cria no banco todas as entidades necessárias para o sistema

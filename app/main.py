@@ -4,13 +4,19 @@ from app.api.endpoints import test
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from app.db.models.connection import engine
 from app.db.models.connection import get_session
+from app.db.models.models import create_entities
 
 app = FastAPI()
 
 # Inclui os endpoints de conteúdo
 app.include_router(content.router, prefix="", tags=["contents"])
 app.include_router(test.router, prefix="", tags=["tests"])
+
+@app.on_event("startup")
+def on_startup():
+    create_entities(engine)
 
 @app.get("/")
 def read_root():

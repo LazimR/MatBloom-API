@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 
-DB_URL= "postgresql://postgres:postgres@localhost:5432/matbloom"
+DB_URL= "postgresql://postgres:postgres@matbloom-db:5432/matbloom"
 engine = create_engine(DB_URL, pool_pre_ping=True, pool_size=7)
 SessionLocal = sessionmaker(autocommit=False,autoflush=False,bind=engine)
 
