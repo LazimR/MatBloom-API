@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from app.db.models.models import Classroom as ClassroomModel
 from app.db.models.models import User as UserModel
 from app.api.schemas.user import UserCreate, User as UserSchema
 
@@ -29,6 +30,20 @@ class UserRepository:
     def list_users(self) -> list[UserSchema]:
         users = self.db_session.query(UserModel).all()
         return [UserSchema.model_validate(user) for user in users]
+    
+    def add_classroom_to_user(self, user_id: int, classroom_id: int):
+        user = self.db_session.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            raise ValueError(f"User with ID {user_id} does not exist.")
+
+        classroom = self.db_session.query(ClassroomModel).filter(ClassroomModel.id == classroom_id).first()
+        if not classroom:
+            raise ValueError(f"Classroom with ID {classroom_id} does not exist.")
+
+        user.classes.append(classroom)
+        self.db_session.commit()
+        self.db_session.refresh(user)
+        return user
 
     def create_user(self, user: UserCreate) -> UserSchema:
         db_user = UserModel(**user.model_dump())
