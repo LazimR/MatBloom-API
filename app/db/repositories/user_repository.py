@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Session
+from app.api.security.auth import pwd_context
+
 from app.db.models.models import Classroom as ClassroomModel
 from app.db.models.models import User as UserModel
 from app.api.schemas.user import UserCreate, User as UserSchema
+from app.api.schemas.user import UserLogin, UserUpdate, UserDelete
 
 class UserRepository:
     """
@@ -46,8 +49,44 @@ class UserRepository:
         return user
 
     def create_user(self, user: UserCreate) -> UserSchema:
-        db_user = UserModel(**user.model_dump())
+        hashed_password = pwd_context.hash(user.password)
+        db_user = UserModel(
+            username=user.username,
+            email=user.email,
+            password=hashed_password,
+            acess_level=user.acess_level
+        )
         self.db_session.add(db_user)
         self.db_session.commit()
         self.db_session.refresh(db_user)
         return UserSchema.model_validate(db_user)
+    
+    def authenticate_user(self, user:UserLogin) -> UserSchema | None:
+        db_user = self.db_session.query(UserModel).filter(UserModel.username == user.username).first()
+        if db_user and pwd_context.verify(user.password, db_user.password):
+            return UserSchema.model_validate(db_user)
+        return None
+    
+    def delete_user(self, user_delete: UserDelete) -> bool:
+        user = self.db_session.query(UserModel).filter(UserModel.id == user_delete.id).first()
+        if not user:
+            raise ValueError(f"User with ID {user_delete.id} does not exist.")
+        self.db_session.delete(user)
+        self.db_session.commit()
+        return True
+
+    def update_user(self, user_update: UserUpdate) -> UserSchema:
+        user = self.db_session.query(UserModel).filter(UserModel.id == user_update.id).first()
+        if not user:
+            raise ValueError(f"User with ID {user_update.id} does not exist.")
+
+        if user_update.username is not None:
+            user.username = user_update.username
+        if user_update.email is not None:
+            user.email = user_update.email
+        if user_update.password is not None:
+            user.password = pwd_context.hash(user_update.password)
+
+        self.db_session.commit()
+        self.db_session.refresh(user)
+        return UserSchema.model_validate(user)

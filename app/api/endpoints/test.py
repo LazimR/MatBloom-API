@@ -7,10 +7,11 @@ from app.db.repositories.test_repository import TestRepository
 from app.api.schemas.test import Test, TestCreate
 from app.api.schemas.question import Question
 from app.api.services.test_generate import test_generate
+from app.api.security.auth import require_user
 
 router = APIRouter()
 
-@router.post("/tests", response_model=Test)
+@router.post("/", response_model=Test, dependencies=[Depends(require_user)])
 def create_test(test: TestCreate, db: Session = Depends(get_session)):
     """
     Cria um novo teste no banco de dados.
@@ -25,7 +26,7 @@ def create_test(test: TestCreate, db: Session = Depends(get_session)):
     repo = TestRepository(db)
     return repo.create_test(test)
 
-@router.get("/tests", response_model=list[Test])
+@router.get("/", response_model=list[Test], dependencies=[Depends(require_user)])
 def get_all_tests(db: Session = Depends(get_session)):
     """
     Retorna todos os testes do banco de dados.
@@ -39,7 +40,7 @@ def get_all_tests(db: Session = Depends(get_session)):
     repo = TestRepository(db)
     return repo.get_all_tests()
 
-@router.get("/tests/{test_id}", response_model=list[Question])
+@router.get("/{test_id}", response_model=list[Question], dependencies=[Depends(require_user)])
 def get_test(test_id: int, db: Session = Depends(get_session)):
     """
     Retorna um teste específico do banco de dados.
@@ -54,7 +55,7 @@ def get_test(test_id: int, db: Session = Depends(get_session)):
     repo = TestRepository(db)
     return repo.get_test(test_id)
 
-@router.delete("/tests/{test_id}", response_model=bool)
+@router.delete("/{test_id}", response_model=bool, dependencies=[Depends(require_user)])
 def delete_test(test_id: int, db: Session = Depends(get_session)):
     """
     Deleta um teste do banco de dados.
@@ -69,7 +70,7 @@ def delete_test(test_id: int, db: Session = Depends(get_session)):
     repo = TestRepository(db)
     return repo.delete_test(test_id)
 
-@router.get("/tests-generate")
+@router.get("/test_generate")
 def generate_test(
     test_id: int = Header(...), 
     student_name: str = Header(...,example="Lazaro Claubert,Mauricio Benjamin,Pedro Vital"), 

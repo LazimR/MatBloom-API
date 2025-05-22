@@ -26,8 +26,8 @@ class QuestionBase(BaseModel):
     itens: List[str]
     correct_item: int
     level: int
-    contents: List[str]
-    dependencies: Optional[List[str]]
+    contents: Optional[List[str]] = []
+    dependencies: Optional[List[int]] = []
 
 class QuestionCreate(QuestionBase):
     """

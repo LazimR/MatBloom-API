@@ -1,25 +1,17 @@
 from app.db.models.base import Base
-from sqlalchemy import String, Integer, ForeignKey, Date, DateTime, Float
+from sqlalchemy import String, Integer, ForeignKey, Date, DateTime, Float, Table, Column
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import ARRAY
 from app.db.models.connection import engine
 
 class Question(Base):
-
     __tablename__ = "question"
 
-    id:Mapped[int] = mapped_column(Integer,primary_key=True,autoincrement=True)  # Identificador único da questão
-    enunciation:Mapped[str] = mapped_column(String,nullable=False)  # Texto da questão
-    itens:Mapped[list[str]] = mapped_column(ARRAY(String),nullable=False)  # Lista de alternativas
-    correct_item:Mapped[int] = mapped_column(Integer,nullable=True)  # Índice da alternativa correta
-    level:Mapped[int] = mapped_column(Integer,nullable=False)  # Nível da Taxonomia de Bloom (1 a 6)
-    contents:Mapped[list[str]] = mapped_column(ARRAY(String),nullable=True)  # Lista de conteúdos relacionados
-    dependencies: Mapped[list["Question"]] = relationship(
-        secondary="question_dependency",  # Tabela de relacionamento
-        primaryjoin="Question.id == QuestionDependency.question_id",  # Junção primária
-        secondaryjoin="Question.id == QuestionDependency.dependency_id",  # Junção secundária
-        backref="dependents",  # Nome do backref para acessar questões que dependem desta
-    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    enunciation: Mapped[str] = mapped_column(String, nullable=False)
+    itens: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
+    correct_item: Mapped[int] = mapped_column(Integer, nullable=True)
+    level: Mapped[int] = mapped_column(Integer, nullable=False)
 
 class Test(Base):
 
@@ -65,7 +57,10 @@ class Student(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
 
-    # Relacionamento com TestResponse (opcional, se você quiser acessar as respostas do aluno)
+    classroom_id: Mapped[int] = mapped_column(ForeignKey("classroom.id"), nullable=False)
+
+    classroom: Mapped["Classroom"] = relationship("Classroom", back_populates="students")
+
     test_responses: Mapped[list["TestResponse"]] = relationship("TestResponse", back_populates="student")
 
 
@@ -83,6 +78,13 @@ class TestResponse(Base):
     student: Mapped["Student"] = relationship("Student", back_populates="test_responses")
 
 
+user_classroom_association = Table(
+    "user_classroom",
+    Base.metadata,
+    Column("user_id", ForeignKey("user.id"), primary_key=True),
+    Column("classroom_id", ForeignKey("classroom.id"), primary_key=True)
+)
+
 class User(Base):
     __tablename__ = "user"
 
@@ -90,7 +92,14 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    classes: Mapped[list["Classroom"]] = relationship("Classroom", back_populates="user")
+    acess_level: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Relação muitos-para-muitos com Classroom
+    classes: Mapped[list["Classroom"]] = relationship(
+        "Classroom",
+        secondary=user_classroom_association,
+        back_populates="users"
+    )
 
 class Classroom(Base):
     __tablename__ = "classroom"
@@ -98,9 +107,14 @@ class Classroom(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
 
-    # Relacionamento com Student (opcional, se você quiser acessar os alunos da sala)
-    students: Mapped[list["Student"]] = relationship("Student", back_populates="classroom")
+    # Relação muitos-para-muitos com User
+    users: Mapped[list["User"]] = relationship(
+        "User",
+        secondary=user_classroom_association,
+        back_populates="classes"
+    )
 
+    students: Mapped[list["Student"]] = relationship("Student", back_populates="classroom")
 
 def create_entities(engine) -> bool:
     """

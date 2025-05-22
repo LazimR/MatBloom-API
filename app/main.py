@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends
 from app.api.endpoints import content
 from app.api.endpoints import test
+from app.api.endpoints import user
+from app.api.endpoints import question
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -11,8 +13,10 @@ from app.db.models.models import create_entities
 app = FastAPI()
 
 # Inclui os endpoints de conteúdo
-app.include_router(content.router, prefix="", tags=["contents"])
-app.include_router(test.router, prefix="", tags=["tests"])
+app.include_router(content.router, prefix="/content", tags=["Content"])
+app.include_router(test.router, prefix="/test", tags=["Test"])
+app.include_router(user.router, prefix="/user", tags=["User"])
+app.include_router(question.router, prefix="/question", tags=["Question"])
 
 @app.on_event("startup")
 def on_startup():

@@ -37,5 +37,6 @@ class Student(StudentBase):
     test_responses: List[TestResponse] = []
 
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
