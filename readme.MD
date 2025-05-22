@@ -1,20 +1,63 @@
-# MatBloom-API
+# MatBloom API
 
-Este repositório é destinado ao armazenamento da API do Sistema MatBloom. A API será desenvolvida utilizando o framework FastAPI, conhecido por sua alta performance e facilidade de uso.
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-Além disso, a API fará uso do sistema de leitura de gabaritos disponível no repositório [corretor-automatico-por-imagem](https://github.com/Fundacao-1Bi/corretor-automatico-por-imagem) da Fundação 1Bi. Este sistema permitirá a correção automática de gabaritos a partir de imagens, integrando-se perfeitamente com as funcionalidades do MatBloom.
+API principal do Sistema MatBloom para correção automática de avaliações utilizando Taxonomia de Bloom
 
-## Tecnologias Utilizadas
+## 🔍 Sobre o Projeto
 
-- **FastAPI**: Framework web moderno e de alta performance para a construção de APIs com Python.
-- **Sistema de Leitura de Gabaritos**: Ferramenta da Fundação 1Bi para correção automática de gabaritos a partir de imagens.
+A API MatBloom fornece:
 
-## Objetivo
+✅ Integração com o sistema de correção automática por imagem da Fundação 1Bi  
+✅ Processamento de gabaritos e geração de relatórios  
+✅ Gerenciamento de atividades baseadas nos erros dos alunos  
+✅ Autenticação segura e gerenciamento de usuários  
 
-O objetivo deste projeto é fornecer uma API robusta e eficiente para o Sistema MatBloom, facilitando a correção automática de gabaritos e melhorando a experiência dos usuários.
+## 🛠️ Tecnologias Principais
 
-## Como Contribuir
+**Core:**
+- FastAPI (Python 3.11+)
+- PostgreSQL (SQLAlchemy ORM)
+- Pydantic v2 (validação de dados)
 
-Para contribuir com este projeto, envie mensagem no email lrodrigues356@gmail.com .
+**Processamento de Documentos:**
+- ReportLab (geração de PDF)
+- WeasyPrint
+- PyPDF2
 
-Agradecemos seu interesse e contribuição!
+**Visão Computacional:**
+- OpenCV
+- PyTesseract (OCR)
+
+**Segurança:**
+- JWT (python-jose)
+- Bcrypt (hash de senhas)
+
+## 📦 Dependências
+
+Consulte o arquivo `pyproject.toml` para a lista completa de dependências gerenciadas pelo Poetry.
+
+## 🚀 Como Executar
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/matbloom-api.git
+cd matbloom-api
+```
+
+2. Instale as dependências (usando Poetry):
+```bash
+poetry install
+```
+
+3.Configure as variáveis de ambiente:
+```bash
+cp .env.example .env
+# Edite o .env com suas configurações
+```
+4.Execute a API:
+```bash
+poetry run uvicorn main:app --reload
+```
