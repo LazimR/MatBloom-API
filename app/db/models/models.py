@@ -1,8 +1,10 @@
 from app.db.models.base import Base
-from sqlalchemy import String, Integer, ForeignKey, Date, DateTime, Float, Table, Column
+from sqlalchemy import String, Integer, ForeignKey, Date, DateTime, Float, Table, Column, Boolean, func
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import ARRAY
 from app.db.models.connection import engine
+from app.core.academic import ClassroomShift, TestKind, TestTargetType, TestVisibility
+from app.core.roles import UserRole
 
 class Question(Base):
     __tablename__ = "question"
@@ -12,6 +14,20 @@ class Question(Base):
     itens: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     correct_item: Mapped[int] = mapped_column(Integer, nullable=True)
     level: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[DateTime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+
+    contents: Mapped[list["Content"]] = relationship(
+        "Content",
+        secondary="question_content",
+        back_populates="questions",
+    )
+    dependencies: Mapped[list["Question"]] = relationship(
+        "Question",
+        secondary="question_dependency",
+        primaryjoin="Question.id == QuestionDependency.question_id",
+        secondaryjoin="Question.id == QuestionDependency.dependency_id",
+        backref="dependent_questions",
+    )
 
 class Test(Base):
 
@@ -19,6 +35,16 @@ class Test(Base):
 
     id:Mapped[int] = mapped_column(Integer,primary_key=True,autoincrement=True)  # Identificador único da prova
     name:Mapped[str] = mapped_column(String,nullable=False)  # Nome da prova
+    theme: Mapped[str] = mapped_column(String, nullable=False)
+    application_date: Mapped[Date | None] = mapped_column(Date, nullable=True)
+    created_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("user.id"), nullable=True)
+    applied_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("user.id"), nullable=True)
+    classroom_id: Mapped[int | None] = mapped_column(ForeignKey("classroom.id"), nullable=True)
+    source_test_id: Mapped[int | None] = mapped_column(ForeignKey("test.id"), nullable=True)
+    kind: Mapped[str] = mapped_column(String, nullable=False, default=TestKind.TEMPLATE.value)
+    visibility: Mapped[str] = mapped_column(String, nullable=False, default=TestVisibility.PRIVATE.value)
+    target_type: Mapped[str] = mapped_column(String, nullable=False, default=TestTargetType.INDIVIDUAL.value)
+    created_at: Mapped[DateTime] = mapped_column(DateTime, nullable=False, server_default=func.now())
 
     questions: Mapped[list["Question"]] = relationship(
         "Question",
@@ -27,6 +53,10 @@ class Test(Base):
     )
 
     test_responses: Mapped[list["TestResponse"]] = relationship("TestResponse", back_populates="test")
+    created_by: Mapped["User | None"] = relationship("User", foreign_keys=[created_by_user_id])
+    applied_by: Mapped["User | None"] = relationship("User", foreign_keys=[applied_by_user_id])
+    classroom: Mapped["Classroom | None"] = relationship("Classroom")
+    source_test: Mapped["Test | None"] = relationship("Test", remote_side="Test.id")
 class TestQuestion(Base):
     __tablename__ = "test_question"
 
@@ -38,6 +68,11 @@ class Content(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    questions: Mapped[list["Question"]] = relationship(
+        "Question",
+        secondary="question_content",
+        back_populates="contents",
+    )
 
 class QuestionContent(Base):
     __tablename__ = "question_content"
@@ -56,6 +91,9 @@ class Student(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
+    registration: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    created_at: Mapped[DateTime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     classroom_id: Mapped[int] = mapped_column(ForeignKey("classroom.id"), nullable=False)
 
@@ -73,6 +111,7 @@ class TestResponse(Base):
     score: Mapped[float] = mapped_column(Float, nullable=True)  # Nota da prova
     responses: Mapped[list[int]] = mapped_column(ARRAY(Integer), nullable=False)  # Respostas do aluno
     wrong_questions: Mapped[list[int]] = mapped_column(ARRAY(Integer), nullable=True)  # Questões erradas
+    attempt_date: Mapped[Date] = mapped_column(Date, nullable=False, server_default=func.current_date())
     # Relacionamentos
     test: Mapped["Test"] = relationship("Test", back_populates="test_responses")
     student: Mapped["Student"] = relationship("Student", back_populates="test_responses")
@@ -92,7 +131,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    acess_level: Mapped[int] = mapped_column(Integer, nullable=False)
+    role: Mapped[str] = mapped_column(String, nullable=False, default=UserRole.TEACHER.value)
 
     # Relação muitos-para-muitos com Classroom
     classes: Mapped[list["Classroom"]] = relationship(
@@ -106,6 +145,10 @@ class Classroom(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
+    school_year: Mapped[int] = mapped_column(Integer, nullable=False)
+    grade_level: Mapped[str] = mapped_column(String, nullable=False)
+    shift: Mapped[str] = mapped_column(String, nullable=False, default=ClassroomShift.MORNING.value)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     # Relação muitos-para-muitos com User
     users: Mapped[list["User"]] = relationship(

@@ -1,7 +1,9 @@
-from app.api.schemas.classroom import Classroom
+from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, model_validator
-from typing import Optional, List
+from pydantic import BaseModel, EmailStr, Field, model_validator
+
+from app.api.schemas.classroom import Classroom
+from app.core.roles import UserRole
 
 class UserBase(BaseModel):
     """
@@ -10,13 +12,11 @@ class UserBase(BaseModel):
         - Attributes:
             - username: str - Nome de usuário.
             - email: EmailStr - Endereço de e-mail do usuário.
-            - password: str - Senha do usuário.
-            - acess_level: int - Nível de acesso do usuário (1 e 2).
+            - role: UserRole - Papel do usuário no sistema.
     """
     username: str
     email: EmailStr
-    password: str
-    acess_level: int = 2
+    role: UserRole = UserRole.TEACHER
 
 class UserCreate(UserBase):
     """
@@ -25,11 +25,9 @@ class UserCreate(UserBase):
         - Attributes:
             - username: str - Nome de usuário.
             - email: EmailStr - Endereço de e-mail do usuário.
-            - password: str - Senha do usuário.
-            - acess_level: int - Nível de acesso do usuário (1 e 2).
+            - role: UserRole - Papel do usuário no sistema.
     """
-
-    pass
+    password: str
 
 class UserUpdate(BaseModel):
     """
@@ -44,11 +42,17 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
+    role: Optional[UserRole] = None
 
     @model_validator(mode="after")
     def at_least_one_field_modified(self):
-        if self.username is None and self.email is None and self.password is None:
-            raise ValueError("Pelo menos um dos campos username, email ou password deve ser modificado.")
+        if (
+            self.username is None
+            and self.email is None
+            and self.password is None
+            and self.role is None
+        ):
+            raise ValueError("Pelo menos um dos campos username, email, password ou role deve ser modificado.")
         return self
 
 class UserDelete(BaseModel):
@@ -82,7 +86,7 @@ class User(UserBase):
             - password: str - Senha do usuário.
     """
     id: int
-    classes: List[Classroom] = []
+    classes: List[Classroom] = Field(default_factory=list)
 
     model_config = {
         "from_attributes": True

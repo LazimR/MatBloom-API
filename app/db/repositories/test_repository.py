@@ -1,170 +1,165 @@
 from sqlalchemy.orm import Session, joinedload
 
-from app.db.models.models import TestQuestion
-from app.db.models.models import Test as TestModel
-from app.db.models.models import Question as QuestionModel
-from app.api.schemas.test import TestCreate
-from app.api.schemas.test import Test as TestSchema
 from app.api.schemas.question import Question as QuestionSchema
+from app.api.schemas.test import Test as TestSchema
+from app.api.schemas.test import TestApplicationCreate, TestCreate
+from app.core.academic import TestKind, TestVisibility
+from app.core.exceptions import NotFoundError, ValidationError
+from app.core.roles import UserRole
+from app.db.models.models import Classroom as ClassroomModel
+from app.db.models.models import Question as QuestionModel
+from app.db.models.models import Test as TestModel
+from app.db.models.models import TestQuestion
+
 
 class TestRepository:
-    """
-        Esta classe é responsável por interagir com o banco de dados para operações relacionadas a testes.
-        Ela fornece métodos para criar, ler e deletar testes, bem como para obter questões associadas a um teste.
-
-        - Attributes:
-            - db_session: Session - Sessão do banco de dados utilizada para realizar operações.
-        
-        - Funcs: 
-            - get_test: Retorna as questões de um teste específico do banco de dados.
-            - get_all_tests: Retorna todos os testes do banco de dados.
-            - get_test_questions: Retorna todas as questões associadas a um teste específico.
-            - create_test: Cria um novo teste no banco de dados com as questões associadas.
-            - delete_test: Deleta um teste do banco de dados.
-    """
-
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
     def get_test(self, test_id: int) -> TestSchema:
-        """
-            Retorna um teste específico do banco de dados.
+        db_test = self._get_test_model(test_id)
+        return self._build_test_schema(db_test)
 
-            props:
-                - test_id: int - ID do teste a ser retornado.
+    def get_all_tests(
+        self,
+        current_user: dict | None = None,
+        accessible_classroom_ids: set[int] | None = None,
+        kind: str | None = None,
+    ) -> list[TestSchema]:
+        query = self._base_query()
 
-            return:
-                - TestSchema- Um schema de test.
+        if kind:
+            query = query.filter(TestModel.kind == kind)
 
-        """
-        
-        # Verifica se o teste existe no banco de dados
-        db_test = self.db_session.query(TestModel).filter(TestModel.id == test_id).first()
-
-        if db_test:
-            questions = self.get_test_questions(test_id)
-            list_questions = [
-            QuestionSchema(
-                **{k: v for k, v in question.__dict__.items() if k != "dependencies"},
-                dependencies=[
-                    QuestionSchema(**dependency.__dict__) for dependency in question.dependencies
-                ]
+        if current_user and current_user.get("role") == UserRole.TEACHER.value:
+            user_id = current_user.get("user_id")
+            query = query.filter(
+                (
+                    (TestModel.kind == TestKind.TEMPLATE.value)
+                    & (
+                        (TestModel.visibility == TestVisibility.LIBRARY.value)
+                        | (TestModel.visibility == TestVisibility.SHARED.value)
+                        | (TestModel.created_by_user_id == user_id)
+                    )
+                )
+                | (
+                    (TestModel.kind == TestKind.APPLICATION.value)
+                    & TestModel.classroom_id.in_(accessible_classroom_ids or set())
+                )
             )
-            for question in questions
-        ]
-            if len(list_questions) == 0:
-                raise ValueError(f"Test with ID {test_id} has no questions.") 
-        else:
-            raise ValueError(f"Test with ID {test_id} does not exist.")
-            
 
+        tests = query.order_by(TestModel.id).all()
+        if not tests:
+            raise NotFoundError("No tests found in the database.")
+
+        return [self._build_test_schema(test) for test in tests]
+
+    def create_test(self, test: TestCreate) -> TestSchema:
+        db_test = TestModel(
+            **test.model_dump(exclude={"questions"}),
+            kind=TestKind.TEMPLATE.value,
+            classroom_id=None,
+            source_test_id=None,
+            applied_by_user_id=None,
+        )
+        self.db_session.add(db_test)
+        self.db_session.flush()
+        self._attach_questions(db_test.id, test.questions)
+        self.db_session.commit()
+        return self.get_test(db_test.id)
+
+    def apply_test_to_classroom(
+        self,
+        template_id: int,
+        application: TestApplicationCreate,
+        applied_by_user_id: int,
+    ) -> TestSchema:
+        template = self._get_test_model(template_id)
+        if template.kind != TestKind.TEMPLATE.value:
+            raise ValidationError("Somente modelos de prova podem ser aplicados a turmas.")
+
+        classroom = (
+            self.db_session.query(ClassroomModel)
+            .filter(ClassroomModel.id == application.classroom_id)
+            .first()
+        )
+        if not classroom:
+            raise NotFoundError(f"Classroom with ID {application.classroom_id} does not exist.")
+
+        db_test = TestModel(
+            name=application.name or template.name,
+            theme=template.theme,
+            application_date=application.application_date,
+            created_by_user_id=template.created_by_user_id,
+            applied_by_user_id=applied_by_user_id,
+            classroom_id=application.classroom_id,
+            source_test_id=template.id,
+            kind=TestKind.APPLICATION.value,
+            visibility=template.visibility,
+            target_type=application.target_type.value,
+        )
+        self.db_session.add(db_test)
+        self.db_session.flush()
+        self._attach_questions(db_test.id, [question.id for question in template.questions])
+        self.db_session.commit()
+        return self.get_test(db_test.id)
+
+    def delete_test(self, test_id: int) -> bool:
+        db_test = self._get_test_model(test_id)
+        self.db_session.delete(db_test)
+        self.db_session.commit()
+        return True
+
+    def _base_query(self):
+        return self.db_session.query(TestModel).options(
+            joinedload(TestModel.questions).joinedload(QuestionModel.contents),
+            joinedload(TestModel.questions).joinedload(QuestionModel.dependencies),
+        )
+
+    def _get_test_model(self, test_id: int) -> TestModel:
+        db_test = self._base_query().filter(TestModel.id == test_id).first()
+        if not db_test:
+            raise NotFoundError(f"Test with ID {test_id} does not exist.")
+        if len(db_test.questions) == 0:
+            raise ValidationError(f"Test with ID {test_id} has no questions.")
+        return db_test
+
+    def _attach_questions(self, test_id: int, question_ids: list[int]):
+        for question_id in question_ids:
+            question = (
+                self.db_session.query(QuestionModel)
+                .filter(QuestionModel.id == question_id)
+                .first()
+            )
+            if not question:
+                raise NotFoundError(f"Question with ID {question_id} does not exist.")
+            self.db_session.add(TestQuestion(test_id=test_id, question_id=question_id))
+
+    def _build_test_schema(self, db_test: TestModel) -> TestSchema:
         return TestSchema(
             id=db_test.id,
             name=db_test.name,
-            questions=list_questions
-            )
-    
-    def get_all_tests(self) -> list[TestSchema]:
-        """
-        Retorna todos os testes do banco de dados.
-        """
-        # Carrega os testes com as questões associadas
-        tests = self.db_session.query(TestModel).options(
-        joinedload(TestModel.questions).joinedload(QuestionModel.dependencies)
-    ).all()
-
-        if not tests:
-            raise ValueError("No tests found in the database.")
-
-        list_test = [
-        TestSchema(
-            id=test.id,
-            name=test.name,
-            questions=[
-                QuestionSchema(
-                    **{k: v for k, v in question.__dict__.items() if k != "dependencies"},
-                    dependencies=[
-                        QuestionSchema(**dependency.__dict__) for dependency in question.dependencies
-                    ]
-                )
-                for question in test.questions
-            ]
+            theme=db_test.theme,
+            application_date=db_test.application_date,
+            created_by_user_id=db_test.created_by_user_id,
+            applied_by_user_id=db_test.applied_by_user_id,
+            classroom_id=db_test.classroom_id,
+            source_test_id=db_test.source_test_id,
+            kind=db_test.kind,
+            visibility=db_test.visibility,
+            target_type=db_test.target_type,
+            created_at=db_test.created_at,
+            questions=[self._build_question_schema(question) for question in db_test.questions],
         )
-        for test in tests
-    ]
 
-        return list_test
-    
-    def get_test_questions(self, test_id: int) -> list[QuestionModel]:
-        """
-            Retorna todas as questões associadas a um teste específico.
-
-            props:
-                - test_id: int - ID do teste cujas questões serão retornadas.
-            
-            return:
-                - list[Question] - Lista de questões associadas ao teste.
-
-        """
-        
-        # Verifica se o teste existe no banco de dados
-        db_test = self.db_session.query(TestModel).filter(TestModel.id == test_id).first()
-
-        if not db_test:
-            raise ValueError(f"Test with ID {test_id} does not exist.")
-
-        # Retorna as questões associadas ao teste
-        return self.db_session.query(QuestionModel).join(TestQuestion).filter(TestQuestion.test_id == test_id).all()
-    
-    def create_test(self, test: TestCreate) -> TestSchema:
-        """
-            Cria um novo teste no banco de dados com as questões associadas.
-
-            props:
-                - test: TestCreate - Objeto com os dados do teste a ser criado.
-            
-            return:
-                - Test - Objeto Test criado no banco de dados.
-
-        """
-
-        # Cria o objeto Test sem as questões
-        db_test = TestModel(**test.model_dump(exclude={"questions"}))
-
-        # Adiciona o Test à sessão e gera o ID com flush
-        self.db_session.add(db_test)
-        self.db_session.flush()  # Gera o ID do Test sem confirmar a transação
-
-        # Verifica se as questões existem no banco de dados
-        for question_id in test.questions:
-            question = self.db_session.query(QuestionModel).filter(QuestionModel.id == question_id).first()
-            if not question:
-                raise ValueError(f"Question with ID {question_id} does not exist.")
-
-            # Adiciona a relação na tabela TestQuestion
-            test_question = TestQuestion(test_id=db_test.id, question_id=question_id)
-            self.db_session.add(test_question)
-
-        # Confirma a transação
-        self.db_session.commit()
-        self.db_session.refresh(db_test)  # Atualiza o objeto Test com os dados finais
-        return TestSchema(**db_test.dict())
-    
-    def delete_test(self, test_id: int) -> bool:
-        """
-            Deleta um teste do banco de dados.
-
-            props:
-                - test_id: int - ID do teste a ser deletado.
-
-            return:
-                - bool - True se o teste foi deletado com sucesso, raise caso contrário.
-        """
-        db_test = self.db_session.query(TestModel).filter(TestModel.id == test_id).first()
-        if db_test:
-            self.db_session.delete(db_test)
-            self.db_session.commit()
-        else:
-            raise ValueError(f"Test with ID {test_id} does not exist.")
-    
-        return True
+    def _build_question_schema(self, question: QuestionModel) -> QuestionSchema:
+        return QuestionSchema(
+            id=question.id,
+            enunciation=question.enunciation,
+            itens=question.itens,
+            correct_item=question.correct_item,
+            level=question.level,
+            contents=[content.name for content in question.contents],
+            dependencies=[dependency.id for dependency in question.dependencies],
+            created_at=question.created_at,
+        )

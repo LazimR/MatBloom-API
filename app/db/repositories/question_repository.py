@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 
 from app.api.schemas.question import Question as QuestionSchema, QuestionCreate, QuestionDelete
+from app.core.exceptions import NotFoundError, OperationError, ValidationError
 from app.db.models.models import Question as QuestionModel, QuestionDependency, Content, QuestionContent
-from app.db.models.connection import get_session
 
 class QuestionRepository:
     def __init__(self,db_session:Session) -> None:
@@ -13,17 +13,17 @@ class QuestionRepository:
         db_questions = self.db_session.query(QuestionModel).all()
 
         if not db_questions:
-            raise ValueError("Não a nenhum questão cadastrada.")
+            raise NotFoundError("Não há nenhuma questão cadastrada.")
         
-        return [QuestionSchema.model_validate(question) for question in db_questions]
+        return [self._build_question_schema(question) for question in db_questions]
     
     def get_question(self, question_id:int) -> QuestionSchema:
         db_question = self.db_session.query(QuestionModel).filter(QuestionModel.id == question_id).first()
 
         if not db_question:
-            raise ValueError(f"Questão com ID {question_id} não existe.")
+            raise NotFoundError(f"Questão com ID {question_id} não existe.")
         
-        return QuestionSchema.model_validate(db_question)
+        return self._build_question_schema(db_question)
     
     def create_question(self, question_data: QuestionCreate) -> QuestionSchema:
         db_question = QuestionModel(
@@ -53,6 +53,8 @@ class QuestionRepository:
 
         # Ligar dependências
         for dep_id in question_data.dependencies:
+            if dep_id == db_question.id:
+                raise ValidationError("Uma questão não pode depender dela mesma.")
             dep = QuestionDependency(
                 question_id=db_question.id,
                 dependency_id=dep_id
@@ -60,7 +62,8 @@ class QuestionRepository:
             self.db_session.add(dep)
 
         self.db_session.commit()
-        return db_question
+        self.db_session.refresh(db_question)
+        return self._build_question_schema(db_question)
 
 
     
@@ -68,15 +71,27 @@ class QuestionRepository:
         db_question = self.db_session.query(QuestionModel).filter(QuestionModel.id == question.id).first()
 
         if not db_question:
-            raise ValueError(f"Questão com ID {question.id} não existe.")
+            raise NotFoundError(f"Questão com ID {question.id} não existe.")
         
         try:
             self.db_session.delete(db_question)
             self.db_session.commit()
         except Exception as e:
             self.db_session.rollback()
-            raise ValueError(f"Erro ao deletar questão: {e}")
+            raise OperationError(f"Erro ao deletar questão: {e}")
         
         return True
+
+    def _build_question_schema(self, question: QuestionModel) -> QuestionSchema:
+        return QuestionSchema(
+            id=question.id,
+            enunciation=question.enunciation,
+            itens=question.itens,
+            correct_item=question.correct_item,
+            level=question.level,
+            contents=[content.name for content in question.contents],
+            dependencies=[dependency.id for dependency in question.dependencies],
+            created_at=question.created_at,
+        )
     
     

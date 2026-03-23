@@ -1,10 +1,11 @@
 from statistics import mean
-import glob
+from io import BytesIO
+
 import cv2
 import numpy as np
-import utils
 import pytesseract as pt
-from io import BytesIO
+
+from app.api.services import utils
 
 DEBUGAR = False
 gabarito = ["a", "b", "c", "d", "e", "a", "b", "c", "d", "e"]
@@ -16,9 +17,9 @@ def corrigir(arquivo: BytesIO, gabarito:list = None, numero_questoes=NUMERO_QUES
     
     number_to_letter = lambda number: chr(number + 65)    
 
-    nome_do_arquivo = np.asarray(bytearray(arquivo.read()), dtype=np.uint8)
+    imagem_bytes = np.asarray(bytearray(arquivo.read()), dtype=np.uint8)
 
-    img = cv2.imdecode(nome_do_arquivo, cv2.IMREAD_COLOR)
+    img = cv2.imdecode(imagem_bytes, cv2.IMREAD_COLOR)
     # Redimensiona a imagem para um tamanho padrão 3:4
     if img is None:
         raise ValueError("A imagem não pôde ser carregada. Verifique o arquivo.")
@@ -43,7 +44,7 @@ def corrigir(arquivo: BytesIO, gabarito:list = None, numero_questoes=NUMERO_QUES
         linha = linha.strip().upper()  # Normaliza para minúsculas
         if "ID:" in linha:
             # Extrai o valor após "ID:" e remove caracteres não numéricos
-            id_str = linha.split("id:")[-1].strip()
+            id_str = linha.split("ID:")[-1].strip()
             # Filtra apenas dígitos
             id_aluno = ''.join(filter(str.isdigit, id_str))
             break
@@ -60,12 +61,15 @@ def corrigir(arquivo: BytesIO, gabarito:list = None, numero_questoes=NUMERO_QUES
         imagem_binaria, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     retangulos = utils.encontrar_retangulos(contornos)
+    if not retangulos:
+        raise ValueError("Não foi possível encontrar a área do gabarito na imagem enviada.")
     maior_retangulo = retangulos[0]
     vertices_maior_retangulo = utils.encontrar_vertices(maior_retangulo)
     vertices_ordenadas = utils.reordenar_pontos(vertices_maior_retangulo)
 
-    cv2.drawContours(img_copy, vertices_ordenadas, -1, (255, 0, 0), 60)
-    cv2.imshow("img_copy", img_copy)
+    if DEBUGAR:
+        cv2.drawContours(img_copy, vertices_ordenadas, -1, (255, 0, 0), 60)
+        cv2.imshow("img_copy", img_copy)
 
     # Corrige perspectiva da Imagem
 
@@ -128,7 +132,7 @@ def corrigir(arquivo: BytesIO, gabarito:list = None, numero_questoes=NUMERO_QUES
                          maior_retangulo], -1, (0, 255, 0), 20)
         utils.exibir_imagens([('img', img), ('imagem_sem_sombra', imagem_sem_sombra), (
             'imagem_com_desfoque', imagem_com_desfoque), ('imagem_binaria', imagem_binaria), ('contornos', copia_contornos), ('img_corrigida', img_corrigida), ('img_bordas_cortadas', img_bordas_cortadas)])
-        print("DEBUG Respostas: ", "Arquivo: ", nome_do_arquivo,
+        print("DEBUG Respostas: ", "Arquivo: ", imagem_bytes,
               respostas, "nota: ", pontuacao, "/ 10")
         print("FIM Debug \n\n\n")
         cv2.waitKey(0)

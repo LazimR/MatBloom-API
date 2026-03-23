@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+
+from app.core.exceptions import ConflictError, NotFoundError
 from app.db.models.models import Content
 from app.api.schemas.content import ContentCreate
 
@@ -7,12 +9,19 @@ class ContentRepository:
         self.db_session = db_session
 
     def get_content(self, content_id: int):
-        return self.db_session.query(Content).filter(Content.id == content_id).first()
+        db_content = self.db_session.query(Content).filter(Content.id == content_id).first()
+        if not db_content:
+            raise NotFoundError(f"Content with ID {content_id} does not exist.")
+        return db_content
 
     def get_all_contents(self):
         return self.db_session.query(Content).all()
 
     def create_content(self, content: ContentCreate):
+        existing_content = self.db_session.query(Content).filter(Content.name == content.name).first()
+        if existing_content:
+            raise ConflictError(f"Content with name '{content.name}' already exists.")
+
         db_content = Content(**content.dict())
         self.db_session.add(db_content)
         self.db_session.commit()
@@ -21,16 +30,19 @@ class ContentRepository:
 
     def update_content(self, content_id: int, content: ContentCreate):
         db_content = self.get_content(content_id)
-        if db_content:
-            db_content.name = content.name
-            db_content.description = content.description
-            self.db_session.commit()
-            self.db_session.refresh(db_content)
+        if not db_content:
+            raise NotFoundError(f"Content with ID {content_id} does not exist.")
+
+        db_content.name = content.name
+        self.db_session.commit()
+        self.db_session.refresh(db_content)
         return db_content
 
     def delete_content(self, content_id: int):
         db_content = self.get_content(content_id)
-        if db_content:
-            self.db_session.delete(db_content)
-            self.db_session.commit()
+        if not db_content:
+            raise NotFoundError(f"Content with ID {content_id} does not exist.")
+
+        self.db_session.delete(db_content)
+        self.db_session.commit()
         return db_content

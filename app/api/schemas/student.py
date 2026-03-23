@@ -1,6 +1,9 @@
-from app.api.schemas.test_response import TestResponse
-from pydantic import BaseModel
+from datetime import datetime
 from typing import List
+
+from pydantic import BaseModel, Field
+
+from app.api.schemas.test_response import TestResponse
 
 class StudentBase(BaseModel):
     """
@@ -12,6 +15,9 @@ class StudentBase(BaseModel):
             - password: str - Senha do estudante.
     """
     name: str
+    registration: str
+    classroom_id: int
+    active: bool = True
 
 class StudentCreate(StudentBase):
     """
@@ -24,6 +30,14 @@ class StudentCreate(StudentBase):
     """
     pass
 
+
+class StudentUpdate(BaseModel):
+    id: int
+    name: str | None = None
+    registration: str | None = None
+    classroom_id: int | None = None
+    active: bool | None = None
+
 class Student(StudentBase):
     """
         Esta classe representa o modelo de Estudante para retorno.
@@ -34,7 +48,8 @@ class Student(StudentBase):
             - test_responses: List[TestResponse] - Respostas do estudante.
     """
     id: int
-    test_responses: List[TestResponse] = []
+    created_at: datetime
+    test_responses: List[TestResponse] = Field(default_factory=list)
 
 
     model_config = {

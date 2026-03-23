@@ -34,3 +34,5 @@ def test_generate(test_id: int , student_names: list[str], student_ids: list[str
     # Retorna o arquivo ZIP como resposta
     return zip_buffer
 
+
+test_generate.__test__ = False

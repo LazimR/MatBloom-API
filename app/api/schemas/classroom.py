@@ -1,6 +1,7 @@
+from app.core.academic import ClassroomShift
 from app.api.schemas.student import Student
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 
 class ClassroomBase(BaseModel):
@@ -11,6 +12,10 @@ class ClassroomBase(BaseModel):
             - name: str - Nome da turma.
     """
     name: str
+    school_year: int
+    grade_level: str
+    shift: ClassroomShift
+    active: bool = True
 
 class ClassroomCreate(ClassroomBase):
     """
@@ -20,6 +25,15 @@ class ClassroomCreate(ClassroomBase):
             - name: str - Nome da turma.
     """
     pass
+
+
+class ClassroomUpdate(BaseModel):
+    id: int
+    name: str | None = None
+    school_year: int | None = None
+    grade_level: str | None = None
+    shift: ClassroomShift | None = None
+    active: bool | None = None
 
 class Classroom(ClassroomBase):
     """
@@ -31,7 +45,7 @@ class Classroom(ClassroomBase):
             - students: List[Student] - Lista de estudantes na turma.
     """
     id: int
-    students: List[Student] = []
+    students: List[Student] = Field(default_factory=list)
 
     model_config = {
         "from_attributes": True

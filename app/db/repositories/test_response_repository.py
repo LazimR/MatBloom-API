@@ -1,7 +1,10 @@
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
+from app.core.exceptions import NotFoundError
 from app.db.models.models import TestResponse as TestResponseModel
-from app.api.schemas.test_response import TestResponseCreate, TestResponse
+from app.api.schemas.test_response import TestResponseCreate, TestResponse, TestResponseUpdate
+from app.db.models.models import Student as StudentModel
+from app.db.models.models import Test as TestModel
 
 class TestResponseRepository:
     """
@@ -33,19 +36,22 @@ class TestResponseRepository:
         """
         db_test_response = self.db_session.query(TestResponseModel).filter(TestResponseModel.id == test_response_id).first()
         if db_test_response:
-            return TestResponse.dict(**db_test_response.dict())
+            return TestResponse.model_validate(db_test_response)
         else:
-            raise ValueError(f"Test response with ID {test_response_id} does not exist.")
+            raise NotFoundError(f"Test response with ID {test_response_id} does not exist.")
     
-    def get_all_test_responses(self) -> list[TestResponse]:
+    def get_all_test_responses(self, classroom_ids: set[int] | None = None) -> list[TestResponse]:
         """
             Retorna todas as respostas de teste do banco de dados.
 
             return:
                 - list[TestResponse] - Lista de todas as respostas de teste.
         """
-        db_test_responses = self.db_session.query(TestResponseModel).all()
-        return [TestResponse.dict(**test_response.dict()) for test_response in db_test_responses]
+        query = self.db_session.query(TestResponseModel)
+        if classroom_ids is not None:
+            query = query.join(StudentModel).filter(StudentModel.classroom_id.in_(classroom_ids))
+        db_test_responses = query.all()
+        return [TestResponse.model_validate(test_response) for test_response in db_test_responses]
     
     def create_test_response(self, test_response: TestResponseCreate) -> TestResponse:
         """
@@ -57,11 +63,30 @@ class TestResponseRepository:
             return:
                 - TestResponse - Resposta de teste criada.
         """
-        db_test_response = TestResponseModel(**test_response.dict())
+        if not self.db_session.query(TestModel).filter(TestModel.id == test_response.test_id).first():
+            raise NotFoundError(f"Test with ID {test_response.test_id} does not exist.")
+        if not self.db_session.query(StudentModel).filter(StudentModel.id == test_response.student_id).first():
+            raise NotFoundError(f"Student with ID {test_response.student_id} does not exist.")
+
+        db_test_response = TestResponseModel(**test_response.model_dump())
         self.db_session.add(db_test_response)
         self.db_session.commit()
         self.db_session.refresh(db_test_response)
-        return TestResponse.dict(**db_test_response.dict())
+        return TestResponse.model_validate(db_test_response)
+
+    def update_test_response(self, test_response_update: TestResponseUpdate) -> TestResponse:
+        db_test_response = self.db_session.query(TestResponseModel).filter(TestResponseModel.id == test_response_update.id).first()
+        if not db_test_response:
+            raise NotFoundError(f"Test response with ID {test_response_update.id} does not exist.")
+
+        for field in ("score", "responses", "wrong_questions", "attempt_date"):
+            value = getattr(test_response_update, field)
+            if value is not None:
+                setattr(db_test_response, field, value)
+
+        self.db_session.commit()
+        self.db_session.refresh(db_test_response)
+        return TestResponse.model_validate(db_test_response)
     
     def delete_test_response(self, test_response_id: int) -> bool:
         """
