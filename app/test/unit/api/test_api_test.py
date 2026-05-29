@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from types import SimpleNamespace
 
 import pytest
 from fastapi import HTTPException
@@ -9,7 +10,8 @@ from app.api.endpoints import student as student_endpoint
 from app.api.endpoints import test as test_endpoint
 from app.api.endpoints import test_response as test_response_endpoint
 from app.api.endpoints import user as user_endpoint
-from app.api.schemas.analysis import ClassroomAnalysis, StudentAnalysis, StudentReinforcement
+from app.api.schemas.analysis import ClassroomAnalysis, StudentAnalysis
+from app.api.schemas.user import User as UserSchema
 from app.api.security import auth
 from app.main import app
 
@@ -87,6 +89,80 @@ def test_create_user_requires_admin_after_bootstrap(client, monkeypatch):
     assert response.json()["detail"] == "Apenas administradores podem criar usuários."
 
 
+def test_login_sets_http_only_cookie_and_returns_session_user(client, monkeypatch):
+    fake_user = UserSchema.model_validate(
+        {
+            "id": 7,
+            "username": "professor",
+            "email": "professor@matbloom.com",
+            "role": "professor",
+            "classes": [],
+        }
+    )
+
+    class FakeUserRepository:
+        def __init__(self, _db):
+            pass
+
+        def authenticate_user(self, _user):
+            return fake_user
+
+    monkeypatch.setattr(user_endpoint, "UserRepository", FakeUserRepository)
+
+    response = client.post(
+        "/user/login",
+        data={"username": "professor", "password": "123456"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"authenticated": True, "user": fake_user.model_dump(mode="json")}
+    assert "matbloom_access_token=" in response.headers["set-cookie"]
+    assert "HttpOnly" in response.headers["set-cookie"]
+
+
+def test_session_reads_authenticated_user_from_cookie(client, monkeypatch):
+    fake_user = UserSchema.model_validate(
+        {
+            "id": 7,
+            "username": "professor",
+            "email": "professor@matbloom.com",
+            "role": "professor",
+            "classes": [],
+        }
+    )
+
+    class FakeUserRepository:
+        def __init__(self, _db):
+            pass
+
+        def authenticate_user(self, _user):
+            return fake_user
+
+        def get_user_by_username(self, username):
+            assert username == "professor"
+            return fake_user
+
+    monkeypatch.setattr(user_endpoint, "UserRepository", FakeUserRepository)
+
+    login_response = client.post(
+        "/user/login",
+        data={"username": "professor", "password": "123456"},
+    )
+
+    response = client.get("/user/session", cookies=login_response.cookies)
+
+    assert response.status_code == 200
+    assert response.json() == {"authenticated": True, "user": fake_user.model_dump(mode="json")}
+
+
+def test_logout_clears_auth_cookie(client):
+    response = client.post("/user/logout")
+
+    assert response.status_code == 200
+    assert response.json() == {"detail": "Sessão encerrada com sucesso."}
+    assert "matbloom_access_token=\"\"" in response.headers["set-cookie"]
+
+
 def test_create_classroom_requires_director_or_admin(client, monkeypatch):
     app.dependency_overrides[auth.require_director_or_admin] = lambda: {"role": "diretor"}
 
@@ -102,6 +178,8 @@ def test_create_classroom_requires_director_or_admin(client, monkeypatch):
                 "grade_level": classroom.grade_level,
                 "shift": classroom.shift.value,
                 "active": classroom.active,
+                "teacher_ids": [],
+                "teachers": [],
                 "students": [],
             }
 
@@ -120,6 +198,45 @@ def test_create_classroom_requires_director_or_admin(client, monkeypatch):
 
     assert response.status_code == 200
     assert response.json()["shift"] == "matutino_vespertino"
+
+
+def test_director_can_list_all_classrooms_with_teacher_ids(client, monkeypatch):
+    app.dependency_overrides[auth.require_user] = lambda: {"role": "diretor", "user_id": 5}
+    app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "diretor", "user_id": 5}
+
+    class FakeClassroomRepository:
+        def __init__(self, _db):
+            pass
+
+        def list_classrooms(self, classroom_ids=None):
+            assert classroom_ids is None
+            return [
+                {
+                    "id": 1,
+                    "name": "Turma Exponenciação A",
+                    "school_year": 2026,
+                    "grade_level": "9 ano",
+                    "shift": "manha",
+                    "active": True,
+                    "teacher_ids": [2],
+                    "teachers": [
+                        {
+                            "id": 2,
+                            "username": "prof_expo",
+                            "email": "prof.expo@matbloom.com",
+                        }
+                    ],
+                    "students": [],
+                }
+            ]
+
+    monkeypatch.setattr(classroom_endpoint, "ClassroomRepository", FakeClassroomRepository)
+
+    response = client.get("/classroom/")
+
+    assert response.status_code == 200
+    assert response.json()[0]["teacher_ids"] == [2]
+    assert response.json()[0]["teachers"][0]["username"] == "prof_expo"
 
 
 def test_create_student_requires_director_or_admin(client, monkeypatch):
@@ -262,7 +379,7 @@ def test_teacher_can_apply_library_test_to_own_classroom(client, monkeypatch):
         def __init__(self, _db):
             pass
 
-        def apply_test_to_classroom(self, test_id, application, applied_by_user_id):
+        def apply_test(self, test_id, application, applied_by_user_id):
             captured["test_id"] = test_id
             captured["classroom_id"] = application.classroom_id
             captured["applied_by_user_id"] = applied_by_user_id
@@ -297,6 +414,111 @@ def test_teacher_can_apply_library_test_to_own_classroom(client, monkeypatch):
     assert captured == {"test_id": 5, "classroom_id": 2, "applied_by_user_id": 9}
     assert response.json()["kind"] == "application"
     assert response.json()["source_test_id"] == 5
+
+
+def test_teacher_can_apply_library_test_to_student_in_scope(client, monkeypatch):
+    app.dependency_overrides[auth.require_user] = lambda: {"role": "professor", "user_id": 9}
+    app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "professor", "user_id": 9}
+
+    monkeypatch.setattr(test_endpoint, "ensure_test_scope", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(test_endpoint, "ensure_student_scope", lambda *_args, **_kwargs: None)
+
+    captured = {}
+
+    class FakeTestRepository:
+        def __init__(self, _db):
+            pass
+
+        def apply_test(self, test_id, application, applied_by_user_id):
+            captured["test_id"] = test_id
+            captured["student_id"] = application.student_id
+            captured["target_type"] = application.target_type.value
+            return {
+                "id": 23,
+                "name": application.name or "Aplicacao Individual",
+                "theme": "Exponenciacao",
+                "kind": "application",
+                "visibility": "library",
+                "classroom_id": 1,
+                "student_id": application.student_id,
+                "source_test_id": test_id,
+                "template_group_id": 5,
+                "version_number": 2,
+                "created_by_user_id": 2,
+                "applied_by_user_id": applied_by_user_id,
+                "application_date": date(2026, 4, 2),
+                "target_type": application.target_type.value,
+                "created_at": datetime(2026, 4, 1, 12, 0, 0),
+                "questions": [],
+            }
+
+    monkeypatch.setattr(test_endpoint, "TestRepository", FakeTestRepository)
+
+    response = client.post(
+        "/test/5/apply",
+        json={
+            "student_id": 12,
+            "target_type": "individual",
+            "application_date": "2026-04-02",
+            "name": "Aplicacao Individual",
+        },
+    )
+
+    assert response.status_code == 200
+    assert captured == {"test_id": 5, "student_id": 12, "target_type": "individual"}
+    assert response.json()["student_id"] == 12
+    assert response.json()["target_type"] == "individual"
+
+
+def test_teacher_can_create_new_template_version(client, monkeypatch):
+    app.dependency_overrides[auth.require_user] = lambda: {"role": "professor", "user_id": 9}
+    app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "professor", "user_id": 9}
+
+    monkeypatch.setattr(test_endpoint, "ensure_test_scope", lambda *_args, **_kwargs: None)
+
+    captured = {}
+
+    class FakeTestRepository:
+        def __init__(self, _db):
+            pass
+
+        def create_template_version(self, test_id, version_data, created_by_user_id):
+            captured["test_id"] = test_id
+            captured["questions"] = version_data.questions
+            captured["created_by_user_id"] = created_by_user_id
+            return {
+                "id": 30,
+                "name": version_data.name or "Biblioteca Bloom - Exponenciacao v2",
+                "theme": version_data.theme or "Exponenciacao",
+                "kind": "template",
+                "visibility": "library",
+                "classroom_id": None,
+                "student_id": None,
+                "source_test_id": None,
+                "template_group_id": 5,
+                "version_number": 2,
+                "created_by_user_id": created_by_user_id,
+                "applied_by_user_id": None,
+                "application_date": None,
+                "target_type": "turma",
+                "created_at": datetime(2026, 4, 1, 12, 0, 0),
+                "questions": [],
+            }
+
+    monkeypatch.setattr(test_endpoint, "TestRepository", FakeTestRepository)
+
+    response = client.post(
+        "/test/5/versions",
+        json={
+            "name": "Biblioteca Bloom - Exponenciacao v2",
+            "questions": [1, 2, 3],
+        },
+    )
+
+    assert response.status_code == 200
+    assert captured == {"test_id": 5, "questions": [1, 2, 3], "created_by_user_id": 9}
+    assert response.json()["kind"] == "template"
+    assert response.json()["version_number"] == 2
 
 
 def test_teacher_can_list_only_application_tests_in_scope(client, monkeypatch):
@@ -340,6 +562,158 @@ def test_teacher_can_list_only_application_tests_in_scope(client, monkeypatch):
     assert response.json()[0]["kind"] == "application"
     assert captured["kind"] == "application"
     assert captured["accessible_classroom_ids"] == {2, 3}
+
+
+def test_teacher_can_fetch_library_usage_metrics(client, monkeypatch):
+    app.dependency_overrides[auth.require_user] = lambda: {"role": "professor", "user_id": 9}
+    app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "professor", "user_id": 9}
+
+    captured = {}
+
+    class FakeTestRepository:
+        def __init__(self, _db):
+            pass
+
+        def get_library_usage_metrics(self, current_user=None, accessible_classroom_ids=None):
+            captured["current_user"] = current_user
+            captured["accessible_classroom_ids"] = accessible_classroom_ids
+            return {
+                "total_templates": 2,
+                "used_templates": 1,
+                "unused_templates": 1,
+                "total_applications": 3,
+                "templates_with_individual_applications": 1,
+                "theme_distribution": [
+                    {
+                        "theme": "Exponenciacao",
+                        "application_count": 3,
+                        "template_count": 1,
+                    }
+                ],
+                "bloom_level_distribution": [
+                    {
+                        "level": 3,
+                        "application_count": 6,
+                        "question_count": 2,
+                    }
+                ],
+                "templates": [
+                    {
+                        "template_id": 5,
+                        "template_group_id": 5,
+                        "version_number": 2,
+                        "name": "Template Expo v2",
+                        "theme": "Exponenciacao",
+                        "visibility": "library",
+                        "application_count": 3,
+                        "distinct_teacher_count": 2,
+                        "classroom_application_count": 2,
+                        "individual_application_count": 1,
+                        "last_applied_at": "2026-04-01",
+                        "bloom_level_distribution": [
+                            {
+                                "level": 3,
+                                "application_count": 6,
+                                "question_count": 2,
+                            }
+                        ],
+                        "is_unused": False,
+                    }
+                ],
+            }
+
+    monkeypatch.setattr(test_endpoint, "TestRepository", FakeTestRepository)
+    monkeypatch.setattr(test_endpoint, "get_accessible_classroom_ids", lambda *_args, **_kwargs: {2, 3})
+
+    response = client.get("/test/templates/metrics")
+
+    assert response.status_code == 200
+    assert captured["current_user"] == {"role": "professor", "user_id": 9}
+    assert captured["accessible_classroom_ids"] == {2, 3}
+    assert response.json()["total_templates"] == 2
+    assert response.json()["templates"][0]["template_id"] == 5
+    assert response.json()["templates"][0]["individual_application_count"] == 1
+
+
+def test_teacher_can_generate_pdf_from_test_application(client, monkeypatch):
+    app.dependency_overrides[auth.require_user] = lambda: {"role": "professor", "user_id": 9}
+    app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "professor", "user_id": 9}
+
+    monkeypatch.setattr(test_endpoint, "ensure_test_scope", lambda *_args, **_kwargs: None)
+
+    class FakeTestRepository:
+        def __init__(self, _db):
+            pass
+
+        def get_test(self, test_id):
+            assert test_id == 22
+            return SimpleNamespace(
+                id=22,
+                target_type="turma",
+                student_id=None,
+            )
+
+    def fake_test_generate(test_id, student_names, student_ids, _db):
+        assert test_id == 22
+        assert student_names == ["Maria", "Joao"]
+        assert student_ids == ["7", "8"]
+        from io import BytesIO
+
+        return BytesIO(b"zip-content")
+
+    monkeypatch.setattr(test_endpoint, "TestRepository", FakeTestRepository)
+    monkeypatch.setattr(test_endpoint, "test_generate", fake_test_generate)
+
+    response = client.get(
+        "/test/applications/22/generate",
+        headers={
+            "test-id": "22",
+            "student-name": "Maria,Joao",
+            "student-id": "7,8",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/zip"
+
+
+def test_pdf_generation_route_returns_domain_error_for_invalid_application(client, monkeypatch):
+    app.dependency_overrides[auth.require_user] = lambda: {"role": "professor", "user_id": 9}
+    app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "professor", "user_id": 9}
+
+    monkeypatch.setattr(test_endpoint, "ensure_test_scope", lambda *_args, **_kwargs: None)
+
+    class FakeTestRepository:
+        def __init__(self, _db):
+            pass
+
+        def get_test(self, test_id):
+            assert test_id == 5
+            return SimpleNamespace(
+                id=5,
+                target_type="turma",
+                student_id=None,
+            )
+
+    def fake_test_generate(*_args, **_kwargs):
+        from app.core.exceptions import ValidationError
+
+        raise ValidationError("A geração de PDF só pode ser feita a partir de uma aplicação de prova.")
+
+    monkeypatch.setattr(test_endpoint, "TestRepository", FakeTestRepository)
+    monkeypatch.setattr(test_endpoint, "test_generate", fake_test_generate)
+
+    response = client.get(
+        "/test/applications/5/generate",
+        headers={
+            "test-id": "5",
+            "student-name": "Maria",
+            "student-id": "7",
+        },
+    )
+
+    assert response.status_code == 400
+    assert "aplicação de prova" in response.json()["detail"]
 
 
 def test_teacher_can_update_test_response_score(client, monkeypatch):
@@ -441,20 +815,54 @@ def test_generate_student_reinforcement(client, monkeypatch):
 
     monkeypatch.setattr(student_endpoint, "ensure_student_scope", lambda *_args, **_kwargs: None)
 
-    async def fake_generate_student_reinforcement(_db, student_id):
-        return StudentReinforcement(
-            student_id=student_id,
-            student_name="Maria",
-            source_question_count=4,
-            generated_reinforcement={"questoes": ["Questao 1", "Questao 2"]},
-        )
-
-    monkeypatch.setattr(student_endpoint, "generate_student_reinforcement", fake_generate_student_reinforcement)
-
     response = client.post("/student/7/analysis/reinforcement")
 
+    assert response.status_code == 410
+    assert "descontinuada" in response.json()["detail"]
+
+
+def test_teacher_can_generate_pdf_for_individual_application_without_headers(client, monkeypatch):
+    app.dependency_overrides[auth.require_user] = lambda: {"role": "professor", "user_id": 9}
+    app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "professor", "user_id": 9}
+
+    monkeypatch.setattr(test_endpoint, "ensure_test_scope", lambda *_args, **_kwargs: None)
+
+    class FakeTestRepository:
+        def __init__(self, _db):
+            pass
+
+        def get_test(self, test_id):
+            assert test_id == 22
+            return SimpleNamespace(
+                id=22,
+                target_type="individual",
+                student_id=7,
+            )
+
+    class FakeStudentRepository:
+        def __init__(self, _db):
+            pass
+
+        def get_student(self, student_id):
+            assert student_id == 7
+            return SimpleNamespace(id=7, name="Maria")
+
+    def fake_test_generate(test_id, student_names, student_ids, _db):
+        assert test_id == 22
+        assert student_names == ["Maria"]
+        assert student_ids == ["7"]
+        from io import BytesIO
+
+        return BytesIO(b"zip-content")
+
+    monkeypatch.setattr(test_endpoint, "TestRepository", FakeTestRepository)
+    monkeypatch.setattr(test_endpoint, "StudentRepository", FakeStudentRepository)
+    monkeypatch.setattr(test_endpoint, "test_generate", fake_test_generate)
+
+    response = client.get("/test/applications/22/generate")
+
     assert response.status_code == 200
-    assert response.json()["source_question_count"] == 4
+    assert response.headers["content-type"] == "application/zip"
 
 
 def test_teacher_cannot_access_student_outside_scope(client, monkeypatch):

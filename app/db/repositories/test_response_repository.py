@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import NotFoundError
+from app.core.academic import TestKind, TestTargetType
+from app.core.exceptions import NotFoundError, ValidationError
 from app.db.models.models import TestResponse as TestResponseModel
 from app.api.schemas.test_response import TestResponseCreate, TestResponse, TestResponseUpdate
 from app.db.models.models import Student as StudentModel
@@ -36,6 +37,7 @@ class TestResponseRepository:
         """
         db_test_response = self.db_session.query(TestResponseModel).filter(TestResponseModel.id == test_response_id).first()
         if db_test_response:
+            self._ensure_response_belongs_to_application(db_test_response)
             return TestResponse.model_validate(db_test_response)
         else:
             raise NotFoundError(f"Test response with ID {test_response_id} does not exist.")
@@ -48,6 +50,7 @@ class TestResponseRepository:
                 - list[TestResponse] - Lista de todas as respostas de teste.
         """
         query = self.db_session.query(TestResponseModel)
+        query = query.join(TestModel).filter(TestModel.kind == TestKind.APPLICATION.value)
         if classroom_ids is not None:
             query = query.join(StudentModel).filter(StudentModel.classroom_id.in_(classroom_ids))
         db_test_responses = query.all()
@@ -63,10 +66,20 @@ class TestResponseRepository:
             return:
                 - TestResponse - Resposta de teste criada.
         """
-        if not self.db_session.query(TestModel).filter(TestModel.id == test_response.test_id).first():
-            raise NotFoundError(f"Test with ID {test_response.test_id} does not exist.")
-        if not self.db_session.query(StudentModel).filter(StudentModel.id == test_response.student_id).first():
-            raise NotFoundError(f"Student with ID {test_response.student_id} does not exist.")
+        db_test = self._get_test_application(test_response.test_id)
+        db_student = self._get_student(test_response.student_id)
+
+        if db_test.classroom_id is not None and db_student.classroom_id != db_test.classroom_id:
+            raise ValidationError(
+                "A resposta só pode ser registrada para aluno da mesma turma da aplicação de prova."
+            )
+        if (
+            getattr(db_test, "target_type", TestTargetType.CLASS.value) == TestTargetType.INDIVIDUAL.value
+            and getattr(db_test, "student_id", None) != db_student.id
+        ):
+            raise ValidationError(
+                "A resposta só pode ser registrada para o aluno-alvo da aplicação individual."
+            )
 
         db_test_response = TestResponseModel(**test_response.model_dump())
         self.db_session.add(db_test_response)
@@ -78,6 +91,7 @@ class TestResponseRepository:
         db_test_response = self.db_session.query(TestResponseModel).filter(TestResponseModel.id == test_response_update.id).first()
         if not db_test_response:
             raise NotFoundError(f"Test response with ID {test_response_update.id} does not exist.")
+        self._ensure_response_belongs_to_application(db_test_response)
 
         for field in ("score", "responses", "wrong_questions", "attempt_date"):
             value = getattr(test_response_update, field)
@@ -105,3 +119,28 @@ class TestResponseRepository:
             return True
         else:
             return False
+
+    def _get_test_application(self, test_id: int) -> TestModel:
+        db_test = self.db_session.query(TestModel).filter(TestModel.id == test_id).first()
+        if not db_test:
+            raise NotFoundError(f"Test with ID {test_id} does not exist.")
+        if db_test.kind != TestKind.APPLICATION.value:
+            raise ValidationError("Respostas só podem ser registradas para uma aplicação de prova.")
+        return db_test
+
+    def _get_student(self, student_id: int) -> StudentModel:
+        db_student = self.db_session.query(StudentModel).filter(StudentModel.id == student_id).first()
+        if not db_student:
+            raise NotFoundError(f"Student with ID {student_id} does not exist.")
+        return db_student
+
+    def _ensure_response_belongs_to_application(self, db_test_response: TestResponseModel):
+        test_kind = getattr(getattr(db_test_response, "test", None), "kind", None)
+        if test_kind is None:
+            db_test = self.db_session.query(TestModel).filter(TestModel.id == db_test_response.test_id).first()
+            if not db_test:
+                raise NotFoundError(f"Test with ID {db_test_response.test_id} does not exist.")
+            test_kind = db_test.kind
+
+        if test_kind != TestKind.APPLICATION.value:
+            raise ValidationError("A resposta consultada pertence a uma prova que não é uma aplicação.")

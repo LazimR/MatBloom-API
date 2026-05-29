@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.api.schemas.classroom import ClassroomCreate, ClassroomUpdate, Classroom as ClassroomSchema
 from app.core.exceptions import NotFoundError
@@ -10,10 +10,18 @@ class ClassroomRepository:
         self.db_session = db_session
 
     def get_classroom_model(self, classroom_id: int) -> ClassroomModel | None:
-        return self.db_session.query(ClassroomModel).filter(ClassroomModel.id == classroom_id).first()
+        return (
+            self.db_session.query(ClassroomModel)
+            .options(joinedload(ClassroomModel.students), joinedload(ClassroomModel.users))
+            .filter(ClassroomModel.id == classroom_id)
+            .first()
+        )
 
     def list_classrooms(self, classroom_ids: set[int] | None = None) -> list[ClassroomSchema]:
-        query = self.db_session.query(ClassroomModel)
+        query = self.db_session.query(ClassroomModel).options(
+            joinedload(ClassroomModel.students),
+            joinedload(ClassroomModel.users),
+        )
         if classroom_ids is not None:
             query = query.filter(ClassroomModel.id.in_(classroom_ids))
         classrooms = query.all()

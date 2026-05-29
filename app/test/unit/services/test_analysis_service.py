@@ -174,10 +174,57 @@ def test_generate_student_reinforcement_uses_latest_unique_wrong_questions(monke
         ],
     )
     captured = {}
+    created_payload = {}
 
     async def fake_generate(**kwargs):
         captured.update(kwargs)
-        return {"questoes": ["reforco 1", "reforco 2"]}
+        return {
+            "questions": [
+                {
+                    "enunciation": "Qual fracao equivale a 1/2?",
+                    "itens": ["1/4", "2/4", "3/4", "4/4"],
+                    "correct_item": 1,
+                    "level": 2,
+                    "level_name": "Entender",
+                    "contents": ["Fracoes"],
+                },
+                {
+                    "enunciation": "Qual expressao calcula a area do retangulo?",
+                    "itens": ["b + h", "2b + 2h", "b x h", "b / h"],
+                    "correct_item": 2,
+                    "level": 4,
+                    "level_name": "Analisar",
+                    "contents": ["Geometria"],
+                },
+            ]
+        }
+
+    class FakeTestRepository:
+        def __init__(self, _db):
+            pass
+
+        def create_test(self, payload):
+            created_payload["template"] = payload
+            return SimpleNamespace(
+                id=301,
+                name=payload.name,
+                kind="template",
+                target_type="individual",
+                created_by_user_id=payload.created_by_user_id,
+            )
+
+        def apply_test(self, template_id, payload, applied_by_user_id):
+            created_payload["application"] = {
+                "template_id": template_id,
+                "payload": payload,
+                "applied_by_user_id": applied_by_user_id,
+            }
+            return SimpleNamespace(
+                id=401,
+                name=payload.name,
+                kind="application",
+                target_type="individual",
+            )
 
     monkeypatch.setattr(
         analysis_service,
@@ -185,20 +232,31 @@ def test_generate_student_reinforcement_uses_latest_unique_wrong_questions(monke
         lambda _db, _student_id: student,
     )
     monkeypatch.setattr(analysis_service, "gerar_questoes_reforco", fake_generate)
+    monkeypatch.setattr(analysis_service, "_persist_generated_questions", lambda _db, _questions: [11, 12])
+    monkeypatch.setattr(analysis_service, "TestRepository", FakeTestRepository)
 
     reinforcement = asyncio.run(
-        analysis_service.generate_student_reinforcement(db=None, student_id=9)
+        analysis_service.generate_student_reinforcement(db=None, student_id=9, current_user_id=77)
     )
 
     assert reinforcement.student_name == "Carlos"
     assert reinforcement.source_question_count == 2
-    assert reinforcement.generated_reinforcement == {"questoes": ["reforco 1", "reforco 2"]}
+    assert reinforcement.generated_question_count == 2
+    assert reinforcement.created_template.id == 301
+    assert reinforcement.created_application.id == 401
+    assert reinforcement.pdf_download_url == "/test/applications/401/generate"
+    assert reinforcement.generated_questions[0].level_name == "Entender"
     assert captured == {
         "questao_errada": ["Questao sobre fracoes", "Questao sobre area"],
         "nivel_bloom": [2, 4],
         "conteudo": ["Fracoes", "Geometria"],
         "incluir_todos_niveis": False,
     }
+    assert created_payload["template"].questions == [11, 12]
+    assert created_payload["template"].created_by_user_id == 77
+    assert created_payload["application"]["template_id"] == 301
+    assert created_payload["application"]["payload"].student_id == 9
+    assert created_payload["application"]["applied_by_user_id"] == 77
 
 
 def test_generate_student_reinforcement_requires_recorded_errors(monkeypatch):

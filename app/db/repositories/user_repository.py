@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.api.security.auth import pwd_context
+from app.api.security.auth import hash_password, verify_password
 
 from app.core.exceptions import ConflictError, NotFoundError
 from app.core.roles import UserRole
@@ -97,7 +97,7 @@ class UserRepository:
         if self.db_session.query(UserModel).filter(UserModel.email == user.email).first():
             raise ConflictError(f"User with email '{user.email}' already exists.")
 
-        hashed_password = pwd_context.hash(user.password)
+        hashed_password = hash_password(user.password)
         db_user = UserModel(
             username=user.username,
             email=user.email,
@@ -111,7 +111,7 @@ class UserRepository:
     
     def authenticate_user(self, user:UserLogin) -> UserSchema | None:
         db_user = self.get_user_model_by_username(user.username)
-        if db_user and pwd_context.verify(user.password, db_user.password):
+        if db_user and verify_password(user.password, db_user.password):
             return UserSchema.model_validate(db_user)
         return None
     
@@ -139,7 +139,7 @@ class UserRepository:
                 raise ConflictError(f"User with email '{user_update.email}' already exists.")
             user.email = user_update.email
         if user_update.password is not None:
-            user.password = pwd_context.hash(user_update.password)
+            user.password = hash_password(user_update.password)
         if user_update.role is not None:
             user.role = user_update.role.value
 

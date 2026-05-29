@@ -40,7 +40,10 @@ class Test(Base):
     created_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("user.id"), nullable=True)
     applied_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("user.id"), nullable=True)
     classroom_id: Mapped[int | None] = mapped_column(ForeignKey("classroom.id"), nullable=True)
+    student_id: Mapped[int | None] = mapped_column(ForeignKey("student.id"), nullable=True)
     source_test_id: Mapped[int | None] = mapped_column(ForeignKey("test.id"), nullable=True)
+    template_group_id: Mapped[int | None] = mapped_column(ForeignKey("test.id"), nullable=True)
+    version_number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     kind: Mapped[str] = mapped_column(String, nullable=False, default=TestKind.TEMPLATE.value)
     visibility: Mapped[str] = mapped_column(String, nullable=False, default=TestVisibility.PRIVATE.value)
     target_type: Mapped[str] = mapped_column(String, nullable=False, default=TestTargetType.INDIVIDUAL.value)
@@ -56,7 +59,9 @@ class Test(Base):
     created_by: Mapped["User | None"] = relationship("User", foreign_keys=[created_by_user_id])
     applied_by: Mapped["User | None"] = relationship("User", foreign_keys=[applied_by_user_id])
     classroom: Mapped["Classroom | None"] = relationship("Classroom")
-    source_test: Mapped["Test | None"] = relationship("Test", remote_side="Test.id")
+    student: Mapped["Student | None"] = relationship("Student")
+    source_test: Mapped["Test | None"] = relationship("Test", foreign_keys=[source_test_id], remote_side="Test.id")
+    template_group: Mapped["Test | None"] = relationship("Test", foreign_keys=[template_group_id], remote_side="Test.id")
 class TestQuestion(Base):
     __tablename__ = "test_question"
 
@@ -158,6 +163,14 @@ class Classroom(Base):
     )
 
     students: Mapped[list["Student"]] = relationship("Student", back_populates="classroom")
+
+    @property
+    def teacher_ids(self) -> list[int]:
+        return [user.id for user in self.users if user.role == UserRole.TEACHER.value]
+
+    @property
+    def teachers(self) -> list["User"]:
+        return [user for user in self.users if user.role == UserRole.TEACHER.value]
 
 def create_entities(engine) -> bool:
     """

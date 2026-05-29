@@ -1,12 +1,23 @@
 from io import BytesIO
-import os
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, mm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
+
+from app.api.services.answer_sheet_layout import build_answer_sheet_layout
+from app.core.exceptions import OperationError, ValidationError
+
+
+def _ensure_pdf_fonts_registered():
+    try:
+        pdfmetrics.getFont("Arial")
+    except KeyError:
+        pdfmetrics.registerFont(TTFont("Arial", "app/api/dependencies/ARIAL.TTF"))
+        pdfmetrics.registerFont(TTFont("Arial-Bold", "app/api/dependencies/ARIALBD.TTF"))
+
 
 def pdf_test_generate(test_name: str, questions: list, student_name: str, student_id: str = None):
     """
@@ -19,72 +30,77 @@ def pdf_test_generate(test_name: str, questions: list, student_name: str, studen
         student_name: Nome do aluno
         student_id: ID do aluno
     """
-    pdfmetrics.registerFont(TTFont('Arial', 'app/api/dependencies/ARIAL.TTF'))
-    pdfmetrics.registerFont(TTFont('Arial-Bold', 'app/api/dependencies/ARIALBD.TTF'))
+    if not test_name.strip():
+        raise ValidationError("O nome da prova não pode estar vazio para gerar o PDF.")
+    if not student_name.strip():
+        raise ValidationError("O nome do aluno não pode estar vazio para gerar o PDF.")
+    if not questions:
+        raise ValidationError("A prova precisa ter pelo menos uma questão para gerar o PDF.")
+
+    for index, question in enumerate(questions, start=1):
+        if not question.get("enunciation"):
+            raise ValidationError(f"A questão {index} está sem enunciado.")
+        if not question.get("itens"):
+            raise ValidationError(f"A questão {index} não possui alternativas.")
+
+    _ensure_pdf_fonts_registered()
     buffer = BytesIO()
 
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    styles = getSampleStyleSheet()
-    
-    # Estilos customizados
-    styles.add(ParagraphStyle(
-        name='QuestionTitle',
-        parent=styles['Normal'],
-        fontName='Arial-Bold',
-        fontSize=12,
-        spaceAfter=6
-    ))
-    
-    styles.add(ParagraphStyle(
-        name='QuestionText',
-        parent=styles['Normal'],
-        fontName='Arial',
-        fontSize=11,
-        leading=14,
-        spaceAfter=12
-    ))
-    
-    styles.add(ParagraphStyle(
-        name='ItemText',
-        parent=styles['Normal'],
-        fontName='Arial',
-        fontSize=11,
-        leftIndent=12,
-        spaceAfter=6
-    ))
-    
-    # Conteúdo da prova
-    story = []
-    
-    # Cabeçalho da prova
-    story.append(Paragraph(test_name, styles['Title']))
-    story.append(Paragraph(f"Aluno: {student_name}  ID: {student_id}", styles['QuestionTitle']))
-    story.append(Spacer(1, 0.5 * inch))
-    
-    # Adiciona questões
-    for i, question in enumerate(questions, 1):
-        story.append(Paragraph(f"Questão {i}", styles['QuestionTitle']))
-        story.append(Paragraph(question['enunciation'], styles['QuestionText']))
-        
-        # Adiciona itens (alternativas)
-        for j, item in enumerate(question['itens'], 1):
-            story.append(Paragraph(f"{chr(64 + j)}) {item}", styles['ItemText']))
-        
-        story.append(Spacer(1, 0.2 * inch))
-        
+    try:
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        styles = getSampleStyleSheet()
 
-    # Gera o PDF
-    doc.build(story)
+        styles.add(ParagraphStyle(
+            name="QuestionTitle",
+            parent=styles["Normal"],
+            fontName="Arial-Bold",
+            fontSize=12,
+            spaceAfter=6
+        ))
 
-    buffer.seek(0)
+        styles.add(ParagraphStyle(
+            name="QuestionText",
+            parent=styles["Normal"],
+            fontName="Arial",
+            fontSize=11,
+            leading=14,
+            spaceAfter=12
+        ))
 
-    return buffer
+        styles.add(ParagraphStyle(
+            name="ItemText",
+            parent=styles["Normal"],
+            fontName="Arial",
+            fontSize=11,
+            leftIndent=12,
+            spaceAfter=6
+        ))
+
+        story = []
+        student_identifier = student_id if student_id is not None else "-"
+
+        story.append(Paragraph(test_name, styles["Title"]))
+        story.append(Paragraph(f"Aluno: {student_name}  ID: {student_identifier}", styles["QuestionTitle"]))
+        story.append(Spacer(1, 0.5 * inch))
+
+        for i, question in enumerate(questions, 1):
+            story.append(Paragraph(f"Questão {i}", styles["QuestionTitle"]))
+            story.append(Paragraph(question["enunciation"], styles["QuestionText"]))
+
+            for j, item in enumerate(question["itens"], 1):
+                story.append(Paragraph(f"{chr(64 + j)}) {item}", styles["ItemText"]))
+
+            story.append(Spacer(1, 0.2 * inch))
+
+        doc.build(story)
+        buffer.seek(0)
+        return buffer
+    except ValidationError:
+        raise
+    except Exception as exc:
+        raise OperationError(f"Erro ao gerar PDF da prova: {exc}") from exc
 
 
-
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import mm
-from reportlab.pdfgen import canvas
 
 def generate_answer_sheet(student_name: str, student_id: str, num_questions: int = 10, num_itens: int = 5):
     """
@@ -95,49 +111,83 @@ def generate_answer_sheet(student_name: str, student_id: str, num_questions: int
         student_name: Nome do aluno
         num_questions: Número total de questões (padrão 10)
     """
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
-    
-    box_width = 40*num_itens  # Largura da caixa
-    box_height = 25.2 * num_questions  # Altura da caixa
-    circle_start_x = 40 * mm  # Posição inicial (margem da borda esquerda)
-    circle_spacing = 15 * mm  # Espaçamento entre os círculos
-    circle_radius = 5  # Raio dos círculos
-    options = [chr(64 + j) for j in range(1, num_itens + 1)]
-    
-    c.setFont("Helvetica-Bold", 14)
-    c.drawString(20*mm, height-20*mm, "Aluno: " + student_name)
-    c.drawString(18.5*mm, height-26*mm," ID: " + student_id)
-    
-    # Opções de resposta (A-E)
-    c.setFont("Helvetica", 12)
-    options_y = height-40*mm
-    for i, option in enumerate(options):
-        c.drawString(35*mm + i*15*mm, options_y, f"{option}")
-    
-    # Números das questões em uma coluna
-    c.setFont("Helvetica", 10)
-    start_y = options_y - 2*mm
-    
-    for i in range(1, num_questions + 1):
-        c.drawString(20*mm, start_y - i*9*mm, f"Q{i}")
-    
-    x = 100  # Posição X do canto inferior esquerdo
-    y = (options_y - box_height) - 20 # Posição Y do canto inferior esquerdo
+    if not student_name.strip():
+        raise ValidationError("O nome do aluno não pode estar vazio para gerar o gabarito.")
+    if student_id is None or not str(student_id).strip():
+        raise ValidationError("O ID do aluno é obrigatório para gerar o gabarito.")
+    if num_questions <= 0:
+        raise ValidationError("O número de questões deve ser maior que zero.")
+    if num_itens <= 0:
+        raise ValidationError("O número de alternativas deve ser maior que zero.")
+    if num_itens > 5:
+        raise ValidationError("O gabarito automático suporta no máximo 5 alternativas por questão.")
 
-    c.setLineWidth(2)
-    c.rect(x, y, box_width, box_height, stroke=1, fill=0)
-    c.setLineWidth(1)
-    for j in range(1, num_questions + 1):
-        for i in range(1, num_itens + 1):
-            c.circle(circle_start_x + (i - 1) * circle_spacing, start_y - 9 * mm * j, circle_radius)
-    
-    
-    c.showPage()  # Finaliza a página 2
-    c.save()
-    buffer.seek(0)  # Move o ponteiro para o início do buffer
-    return buffer
+    try:
+        layout = build_answer_sheet_layout(num_questions, num_itens)
+        buffer = BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+
+        margin_left = 20 * mm
+        margin_right = 15 * mm
+        header_top = height - 20 * mm
+        grid_top = height - 52 * mm
+        grid_bottom = 18 * mm
+        grid_left = 38 * mm
+        available_width = width - grid_left - margin_right
+        available_height = grid_top - grid_bottom
+        scale = min(
+            available_width / layout.total_width,
+            available_height / layout.total_height,
+        )
+        if scale <= 0:
+            raise ValidationError("Não foi possível calcular o layout do gabarito.")
+
+        outer_width = layout.total_width * scale
+        outer_height = layout.total_height * scale
+        outer_x = grid_left
+        outer_y = grid_top - outer_height
+        options = [chr(64 + j) for j in range(1, num_itens + 1)]
+
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(margin_left, header_top, "Aluno: " + student_name)
+        c.drawString(margin_left, height - 26 * mm, "ID: " + str(student_id))
+
+        c.setLineWidth(2)
+        c.rect(outer_x, outer_y, outer_width, outer_height, stroke=1, fill=0)
+
+        c.setLineWidth(1)
+
+        c.setFont("Helvetica", 11)
+        for block in layout.blocks:
+            block_x = outer_x + block.x * scale
+            block_y = outer_y + outer_height - ((block.y + block.height) * scale)
+            row_height = (block.height * scale) / block.question_count
+            col_width = (block.width * scale) / num_itens
+            circle_radius = max(4, min(row_height, col_width) * 0.22)
+
+            option_label_y = block_y + block.height * scale + 5
+            for option_index, option in enumerate(options):
+                center_x = block_x + (option_index + 0.5) * col_width
+                c.drawCentredString(center_x, option_label_y, option)
+
+            for question_offset in range(block.question_count):
+                global_question_number = block.start_index + question_offset + 1
+                center_y = block_y + block.height * scale - ((question_offset + 0.5) * row_height)
+                c.drawRightString(block_x - 6, center_y - 4, f"Q{global_question_number}")
+
+                for option_index in range(num_itens):
+                    center_x = block_x + (option_index + 0.5) * col_width
+                    c.circle(center_x, center_y, circle_radius)
+
+        c.showPage()
+        c.save()
+        buffer.seek(0)
+        return buffer
+    except ValidationError:
+        raise
+    except Exception as exc:
+        raise OperationError(f"Erro ao gerar gabarito em PDF: {exc}") from exc
 
 if __name__ == '__main__':
     pdf_test_generate("prova_aluno.pdf", "Prova de Matemática", [

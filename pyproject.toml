@@ -25,6 +25,7 @@ python-jose = {extras = ["cryptography"], version = "^3.4.0"}
 passlib = "^1.7.4"
 bcrypt = "^4.3.0"
 python-multipart = "^0.0.20"
+alembic = "^1.14.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

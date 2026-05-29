@@ -3,6 +3,12 @@ FROM python:3.11-slim as builder
 
 WORKDIR /app
 
+# Dependências do sistema para build de pacotes Python
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 # Instala o Poetry
 RUN pip install poetry
 
@@ -23,6 +29,15 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Dependências do sistema para OCR/OpenCV e healthcheck do banco
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    libgl1 \
+    libglib2.0-0 \
+    libgomp1 \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copia o código-fonte do projeto
 COPY . .
 
@@ -32,6 +47,8 @@ COPY --from=builder /app/requirements.txt ./
 # Instala as dependências globalmente
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN chmod +x /app/scripts/docker-entrypoint.sh
+
 # Cria um usuário não root para rodar a aplicação
 RUN useradd -m apiuser
 USER apiuser
@@ -40,4 +57,4 @@ USER apiuser
 EXPOSE 8000
 
 # Comando para rodar a aplicação
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/scripts/docker-entrypoint.sh"]

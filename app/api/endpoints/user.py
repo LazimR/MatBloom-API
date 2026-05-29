@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+import os
+
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -6,8 +8,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.api.schemas.classroom import Classroom as ClassroomSchema
 from app.db.models.connection import get_session
 from app.db.repositories.user_repository import UserRepository
-from app.api.schemas.user import User as UserSchema, UserCreate, UserUpdate, UserDelete, UserLogin
+from app.api.schemas.user import AuthSession, User as UserSchema, UserCreate, UserUpdate, UserDelete, UserLogin
 from app.api.security.auth import (
+    auth_cookie_name,
     create_access_token,
     get_current_user_payload,
     get_optional_current_user_payload,
@@ -18,17 +21,61 @@ from app.core.roles import UserRole
 
 router = APIRouter()
 
-@router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_session)):
+COOKIE_MAX_AGE_SECONDS = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440")) * 60
+COOKIE_SECURE = os.getenv("AUTH_COOKIE_SECURE", "false").lower() == "true"
+COOKIE_SAMESITE = os.getenv("AUTH_COOKIE_SAMESITE", "lax")
+
+
+@router.post("/login", response_model=AuthSession)
+def login(
+    response: Response,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_session),
+):
     repo = UserRepository(db)
     db_user = repo.authenticate_user(UserLogin(username=form_data.username, password=form_data.password))
     if not db_user:
         raise HTTPException(status_code=401, detail="Usuário ou senha inválidos")
 
     access_token = create_access_token(
-        data={"sub": db_user.username, "role": db_user.role, "user_id": db_user.id}
+        data={
+            "sub": db_user.username,
+            "role": db_user.role.value if hasattr(db_user.role, "value") else db_user.role,
+            "user_id": db_user.id,
+        }
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    response.set_cookie(
+        key=auth_cookie_name,
+        value=access_token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=COOKIE_MAX_AGE_SECONDS,
+        expires=COOKIE_MAX_AGE_SECONDS,
+        path="/",
+    )
+    return {"authenticated": True, "user": db_user}
+
+
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie(
+        key=auth_cookie_name,
+        path="/",
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+    )
+    return {"detail": "Sessão encerrada com sucesso."}
+
+
+@router.get("/session", response_model=AuthSession, dependencies=[Depends(require_user)])
+def get_current_session(
+    db: Session = Depends(get_session),
+    current_user: dict = Depends(get_current_user_payload),
+):
+    repo = UserRepository(db)
+    user = repo.get_user_by_username(current_user.get("sub"))
+    return {"authenticated": True, "user": user}
 
 @router.post("/", response_model=UserSchema)
 def create_user(

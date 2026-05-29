@@ -1,13 +1,25 @@
 from io import BytesIO
 from zipfile import ZipFile
 from app.api.services.pdf_generate import pdf_test_generate, generate_answer_sheet
+from app.core.academic import TestKind, TestTargetType
+from app.core.exceptions import ValidationError
 from app.db.repositories.test_repository import TestRepository
-from app.db.models.connection import get_session
 
-def test_generate(test_id: int , student_names: list[str], student_ids: list[str], db):    
+
+def test_generate(test_id: int, student_names: list[str], student_ids: list[str], db):
     rep = TestRepository(db)
 
     test = rep.get_test(test_id)
+    if test.kind != TestKind.APPLICATION.value:
+        raise ValidationError("A geração de PDF só pode ser feita a partir de uma aplicação de prova.")
+
+    if student_ids and len(student_ids) != len(student_names):
+        raise ValidationError("A quantidade de IDs de alunos deve corresponder à quantidade de nomes.")
+    if getattr(test, "target_type", TestTargetType.CLASS.value) == TestTargetType.INDIVIDUAL.value:
+        if len(student_names) != 1 or len(student_ids) != 1:
+            raise ValidationError("Aplicações individuais exigem exatamente um aluno na geração do PDF.")
+        if getattr(test, "student_id", None) is not None and str(test.student_id) != str(student_ids[0]):
+            raise ValidationError("A geração do PDF individual deve usar o aluno-alvo da aplicação.")
 
     pdf_buffers = []
 
@@ -19,7 +31,12 @@ def test_generate(test_id: int , student_names: list[str], student_ids: list[str
         pdf_buffer = pdf_test_generate(test.name, questions, student_name, student_id)
         pdf_buffers.append((f"{student_name}_teste.pdf", pdf_buffer))
 
-        answer_sheet_buffer = generate_answer_sheet(student_name, student_id, len(questions), len(questions[0]['itens']))
+        answer_sheet_buffer = generate_answer_sheet(
+            student_name,
+            student_id,
+            len(questions),
+            len(questions[0]["itens"]),
+        )
         pdf_buffers.append((f"{student_name}_gabarito.pdf", answer_sheet_buffer))
 
 

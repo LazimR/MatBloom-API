@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Optional
 import os
+import bcrypt
 from dotenv import load_dotenv
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, Request, status
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.models.connection import get_session
@@ -21,10 +20,18 @@ secret_key = os.getenv("SECRET_KEY")
 jwt_algorithm = os.getenv("JWT_ALGORITHM")
 
 access_token_expire_minutes = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+auth_cookie_name = os.getenv("AUTH_COOKIE_NAME", "matbloom_access_token")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
-optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(password: str, hashed_password: str) -> bool:
+    try:
+        return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
+    except ValueError:
+        return False
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -43,10 +50,26 @@ def verify_access_token(token: str):
             detail="Could not validate credentials",
         )
 
-def get_current_user_payload(token: str = Depends(oauth2_scheme)):
+def extract_access_token_from_request(request: Request) -> str | None:
+    authorization = request.headers.get("Authorization")
+    if authorization:
+        scheme, _, token = authorization.partition(" ")
+        if scheme.lower() == "bearer" and token:
+            return token
+
+    return request.cookies.get(auth_cookie_name)
+
+def get_current_user_payload(request: Request):
+    token = extract_access_token_from_request(request)
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
     return verify_access_token(token)
 
-def get_optional_current_user_payload(token: str | None = Depends(optional_oauth2_scheme)):
+def get_optional_current_user_payload(request: Request):
+    token = extract_access_token_from_request(request)
     if token is None:
         return None
     return verify_access_token(token)

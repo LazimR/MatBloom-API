@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.db.repositories.test_response_repository import TestResponseRepository
@@ -28,12 +28,6 @@ def submit_answer_sheet(
     ensure_test_scope(test_id, session, current_user)
 
     result = process_answer_sheet(image.file, test_id, session)
-
-    if not result:
-        raise HTTPException(status_code=400, detail="Erro ao corrigir a folha de respostas.")
-
-    if result[2] is None:
-        raise HTTPException(status_code=400, detail="Não foi possível identificar o ID do aluno no gabarito.")
     
     response = TestResponseCreate(
         test_id=test_id,

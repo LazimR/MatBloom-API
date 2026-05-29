@@ -209,16 +209,17 @@ poetry run uvicorn app.main:app --reload
 A suíte atual cobre fluxos principais de autenticação, rotas base, criação de entidades, análise pedagógica, escopo por turma, vínculo professor-turma e regras principais da nova estrutura de provas.
 
 ```bash
-PYTHONPATH=. poetry run python -m pytest -q
+poetry run pytest -q
 ```
 
 Estado atual da suíte:
 
-- `24 passed`
+- `51 passed, 1 warning`
 
 ## Observações importantes
 
 - o backend não depende mais de `create_all()` no startup para “migrar” o banco
 - a modelagem de provas foi evoluída para suportar biblioteca/modelo e aplicação por turma
+- a suíte pode ser executada localmente com `poetry run pytest -q`, sem depender de `PYTHONPATH=.`
 - as mudanças de modelagem já feitas no código exigem migração real no PostgreSQL
 - o fluxo de OCR/correção automática já foi estabilizado, mas ainda vale aprofundar os testes dessa parte
