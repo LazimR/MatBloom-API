@@ -1,0 +1,484 @@
+{
+  "questions": [
+    {
+      "enunciation": "Qual é o nome dado ao número que indica quantas vezes a base é multiplicada por ela mesma em uma potência?",
+      "itens": [
+        "Base",
+        "Expoente",
+        "Produto",
+        "Fator"
+      ],
+      "correct_item": 1,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Elementos da potência",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Qual é a propriedade que afirma que, ao multiplicar potências de mesma base, os expoentes são somados?",
+      "itens": [
+        "Potência de potência",
+        "Produto de potências de mesma base",
+        "Divisão de potências",
+        "Expoente zero"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Em uma potência a^n, qual elemento representa o número que será multiplicado repetidas vezes?",
+      "itens": [
+        "Expoente",
+        "Resultado",
+        "Base",
+        "Índice"
+      ],
+      "correct_item": 2,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Elementos da potência",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Qual é a forma geral utilizada para representar um número em notação científica?",
+      "itens": [
+        "a × 10^n, com 1 ≤ a < 10",
+        "10^a × n",
+        "a^n × 10",
+        "n × a^10"
+      ],
+      "correct_item": 0,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Notação científica",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Como é chamada a propriedade que afirma que todo número não nulo elevado a zero é igual a 1?",
+      "itens": [
+        "Expoente negativo",
+        "Potência de potência",
+        "Propriedade do expoente zero",
+        "Produto de potências"
+      ],
+      "correct_item": 2,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Expoente zero",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "A expressão 2 × 2 × 2 × 2 pode ser representada por qual potência?",
+      "itens": [
+        "2^2",
+        "2^3",
+        "2^4",
+        "4^2"
+      ],
+      "correct_item": 2,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Representação em potência",
+        "Interpretação"
+      ]
+    },
+    {
+      "enunciation": "A expressão 5^3 representa qual operação?",
+      "itens": [
+        "5 + 5 + 5",
+        "5 × 5 × 5",
+        "5 × 3",
+        "3 × 3 × 3 × 3 × 3"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Representação em potência",
+        "Interpretação"
+      ]
+    },
+    {
+      "enunciation": "Por que a expressão 10^3 possui o mesmo valor que 1000?",
+      "itens": [
+        "Porque 10 é somado três vezes",
+        "Porque 10 é multiplicado por ele mesmo três vezes",
+        "Porque 10 é multiplicado por 3",
+        "Porque o expoente representa uma divisão"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Interpretação de conceitos"
+      ]
+    },
+    {
+      "enunciation": "A expressão 3 × 10^4 representa qual número em sua forma decimal?",
+      "itens": [
+        "300",
+        "3000",
+        "30000",
+        "300000"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Notação científica",
+        "Interpretação"
+      ]
+    },
+    {
+      "enunciation": "Uma potência de base 2 e expoente 5 pode ser representada por qual expressão?",
+      "itens": [
+        "5^2",
+        "2^5",
+        "2 × 5",
+        "5 × 5"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Representação em potência",
+        "Interpretação"
+      ]
+    },
+    {
+      "enunciation": "Calcule o valor da potência 2^5.",
+      "itens": [
+        "10",
+        "25",
+        "32",
+        "64"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Cálculo de potências",
+        "Potenciação"
+      ]
+    },
+    {
+      "enunciation": "Determine o valor de 4^3.",
+      "itens": [
+        "12",
+        "16",
+        "64",
+        "81"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Cálculo de potências",
+        "Potenciação"
+      ]
+    },
+    {
+      "enunciation": "Simplifique a expressão 2^3 × 2^4 utilizando as propriedades da potenciação.",
+      "itens": [
+        "2^7",
+        "2^12",
+        "4^7",
+        "8^4"
+      ],
+      "correct_item": 0,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Produto de potências"
+      ]
+    },
+    {
+      "enunciation": "Escreva o número 3.000.000 em notação científica.",
+      "itens": [
+        "3 × 10^6",
+        "30 × 10^5",
+        "0,3 × 10^7",
+        "3 × 10^5"
+      ],
+      "correct_item": 0,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Notação científica",
+        "Conversão de números"
+      ]
+    },
+    {
+      "enunciation": "Uma colmeia possui 50 abelhas e sua população dobra a cada mês. Quantas abelhas haverá após 3 meses?",
+      "itens": [
+        "150",
+        "200",
+        "400",
+        "800"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Crescimento exponencial",
+        "Problemas contextualizados"
+      ]
+    },
+    {
+      "enunciation": "A função Q(t) = 5 × 2^t representa o crescimento de uma população. Qual será o valor de Q(4)?",
+      "itens": [
+        "40",
+        "80",
+        "100",
+        "160"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Função exponencial",
+        "Substituição de valores",
+        "Cálculo de funções"
+      ]
+    },
+    {
+      "enunciation": "Calcule o valor da expressão 2^-3.",
+      "itens": [
+        "-8",
+        "8",
+        "1/8",
+        "1/6"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Expoente negativo",
+        "Propriedades da potenciação"
+      ]
+    },
+    {
+      "enunciation": "Resolva a expressão (2^3 × 2^5) ÷ 2^4.",
+      "itens": [
+        "2^4",
+        "2^8",
+        "2^12",
+        "16^2"
+      ],
+      "correct_item": 0,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Expressões com potências"
+      ]
+    },
+    {
+      "enunciation": "Uma estrutura possui 2 peças na primeira etapa e o número de peças dobra a cada etapa seguinte. Quantas peças haverá na sexta etapa?",
+      "itens": [
+        "32",
+        "64",
+        "128",
+        "256"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Progressão de crescimento",
+        "Problemas contextualizados"
+      ]
+    },
+    {
+      "enunciation": "Um investimento segue a fórmula V(t) = 1000 × 1,5^t. Qual será o valor aproximado após 2 anos?",
+      "itens": [
+        "1500",
+        "2250",
+        "2500",
+        "3000"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Função exponencial",
+        "Crescimento financeiro",
+        "Aplicação de fórmulas"
+      ]
+    },
+    {
+      "enunciation": "Uma expressão envolve a operação 2^5 × 2^3. Antes de realizar o cálculo, qual propriedade da potenciação deve ser escolhida para simplificar a expressão?",
+      "itens": [
+        "Produto de potências de mesma base",
+        "Divisão de potências de mesma base",
+        "Potência de potência",
+        "Expoente zero"
+      ],
+      "correct_item": 0,
+      "level": 4,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Análise de estratégias"
+      ]
+    },
+    {
+      "enunciation": "Um estudante deseja calcular 3^4 × 3^2. Qual estratégia é mais adequada para resolver a expressão com menos operações?",
+      "itens": [
+        "Calcular cada potência separadamente e depois multiplicar",
+        "Somar as bases e multiplicar os expoentes",
+        "Aplicar a propriedade do produto de potências de mesma base",
+        "Transformar a expressão em uma soma repetida"
+      ],
+      "correct_item": 2,
+      "level": 5,
+      "contents": [
+        "Exponenciação",
+        "Estratégias de resolução",
+        "Análise matemática"
+      ]
+    },
+    {
+      "enunciation": "Um problema informa que uma bactéria dobra sua população a cada hora, possui inicialmente 100 bactérias e menciona também a cor do recipiente e a temperatura da sala. Quais informações são essenciais para calcular a população após 4 horas?",
+      "itens": [
+        "Apenas a cor do recipiente e a temperatura",
+        "A população inicial e o padrão de duplicação",
+        "Somente o tempo de crescimento",
+        "Todas as informações fornecidas"
+      ],
+      "correct_item": 1,
+      "level": 4,
+      "contents": [
+        "Crescimento exponencial",
+        "Interpretação de problemas",
+        "Análise de informações"
+      ]
+    },
+    {
+      "enunciation": "Observe a expressão (2^3 × 2^4) ÷ 2^5. Qual sequência de propriedades deve ser aplicada para simplificá-la corretamente?",
+      "itens": [
+        "Primeiro potência de potência, depois expoente zero",
+        "Primeiro produto de potências e depois divisão de potências de mesma base",
+        "Primeiro multiplicação comum e depois adição de expoentes",
+        "Não é possível simplificar usando propriedades"
+      ],
+      "correct_item": 1,
+      "level": 4,
+      "contents": [
+        "Exponenciação",
+        "Sequência de estratégias",
+        "Análise matemática"
+      ]
+    },
+    {
+      "enunciation": "Duas expressões representam um crescimento populacional. A primeira utiliza 2^6 e a segunda 2 × 2 × 2 × 2 × 2 × 2. Analise as representações e identifique a alternativa correta.",
+      "itens": [
+        "As expressões possuem valores diferentes",
+        "A segunda é maior por possuir mais multiplicações",
+        "As duas expressões representam o mesmo valor por formas diferentes",
+        "A primeira é maior porque utiliza expoente"
+      ],
+      "correct_item": 2,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Representações matemáticas",
+        "Análise de relações"
+      ]
+    },
+    {
+      "enunciation": "Um aluno afirmou que 5^0 = 0 porque qualquer número elevado a zero deve ser zero. Avalie a afirmação do aluno.",
+      "itens": [
+        "Está correta, pois o expoente zero sempre resulta em zero",
+        "Está incorreta, pois todo número não nulo elevado a zero é igual a 1",
+        "Está correta apenas para números positivos",
+        "Não é possível determinar"
+      ],
+      "correct_item": 1,
+      "level": 5,
+      "contents": [
+        "Exponenciação",
+        "Expoente zero",
+        "Avaliação de argumentos"
+      ]
+    },
+    {
+      "enunciation": "Dois alunos calcularam 2^8. O primeiro realizou oito multiplicações sucessivas e o segundo utilizou propriedades da potenciação para reduzir os cálculos. Qual método é mais eficiente?",
+      "itens": [
+        "O primeiro método, pois segue exatamente a definição de potência",
+        "Os dois possuem sempre a mesma eficiência",
+        "O segundo método, pois reduz a quantidade de operações necessárias",
+        "Nenhum dos métodos é válido"
+      ],
+      "correct_item": 2,
+      "level": 5,
+      "contents": [
+        "Exponenciação",
+        "Comparação de métodos",
+        "Avaliação matemática"
+      ]
+    },
+    {
+      "enunciation": "Um estudante simplificou 2^3 × 2^4 como 2^12, multiplicando os expoentes. Julgue a resolução apresentada.",
+      "itens": [
+        "Está correta porque os expoentes devem ser multiplicados",
+        "Está incorreta porque no produto de potências de mesma base os expoentes devem ser somados",
+        "Está correta apenas quando a base é 2",
+        "Está incorreta porque deveria multiplicar as bases"
+      ],
+      "correct_item": 1,
+      "level": 5,
+      "contents": [
+        "Exponenciação",
+        "Erros conceituais",
+        "Avaliação de resoluções"
+      ]
+    },
+    {
+      "enunciation": "Uma expressão possui várias operações envolvendo potências de mesma base. Antes de resolver os cálculos, qual deve ser o primeiro passo para encontrar a solução corretamente?",
+      "itens": [
+        "Identificar quais propriedades da potenciação devem ser aplicadas em cada etapa",
+        "Multiplicar todos os expoentes entre si",
+        "Somar todas as bases e depois calcular a potência",
+        "Transformar todas as potências em adições repetidas"
+      ],
+      "correct_item": 0,
+      "level": 4,
+      "contents": [
+        "Exponenciação",
+        "Estratégias de resolução",
+        "Análise matemática"
+      ]
+    },
+    {
+      "enunciation": "Dois alunos resolveram a expressão 4^5 de formas diferentes. O primeiro realizou cinco multiplicações sucessivas e o segundo utilizou propriedades da potenciação para simplificar o cálculo. Qual método é mais adequado em termos de eficiência?",
+      "itens": [
+        "O primeiro método, pois sempre deve ser usada apenas a definição de potência",
+        "O segundo método, pois reduz a quantidade de operações necessárias",
+        "Os dois métodos estão errados",
+        "Não é possível comparar os métodos"
+      ],
+      "correct_item": 1,
+      "level": 5,
+      "contents": [
+        "Exponenciação",
+        "Comparação de métodos",
+        "Avaliação matemática"
+      ]
+    }
+  ]
+}

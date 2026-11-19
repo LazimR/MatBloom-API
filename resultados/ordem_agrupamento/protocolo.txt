@@ -1,0 +1,42 @@
+EXPERIMENTO: ORDEM E AGRUPAMENTO
+
+Entrada: as mesmas 20 questões de scripts/questoes/quest_20.json.
+Tamanho do lote fixo: duas questões por chamada.
+Condições: original e embaralhada, com dez rodadas por condição.
+
+A condição original é compartilhada com o experimento de tamanho do lote:
+é a rodada de lote_2 do mesmo bloco. Seu registro é copiado para original/, com
+o campo shared_control_from indicando a procedência; não é uma segunda coleta.
+
+Cada rodada embaralhada usa uma permutação reproduzível. Todas as questões
+mudam de posição e de colega de lote em relação à entrada original. A semente
+e o mapeamento das posições ficam registrados. O modelo recebe somente os
+campos usuais das questões; os identificadores Q001 a Q020 são usados apenas
+na análise para comparar a mesma questão após restaurar a ordem original.
+
+Medidas: número e proporção de classificações que mudam em relação ao controle
+do mesmo bloco, níveis retornados por questão, estabilidade do controle,
+tempo de API e total, respostas inválidas/incompletas e falhas.
+
+O experimento mede o efeito conjunto de ordem e agrupamento. Não separa a
+influência isolada da posição da influência do colega de lote. A variabilidade
+normal do modelo também pode produzir diferenças; as repetições do controle
+ajudam a contextualizar esse comportamento.
+
+Concordância com o controle não comprova correção pedagógica. Acurácia depende
+de uma referência humana externa, que não será gerada a partir do próprio modelo.
+Comparações de nível exigem que a rodada embaralhada e seu controle tenham
+terminado com sucesso. Não são imputados níveis para rodadas que falharam.
+
+Os arquivos rodada_XX_entrada.json registram a permutação; rodada_XX_resultado.json
+contém as classificações concluídas; rodada_XX_registro.json registra tempos,
+tentativas e esperas. metricas.csv, por_questao.csv, requests.csv, waits.csv,
+resumo.json e analise.txt são atualizados a cada rodada concluída.
+
+Execução ou retomada, dentro de MatBloom-API:
+poetry run python scripts/run_classification_experiments.py
+
+O mesmo comando executa ambos os experimentos, sequencialmente e com rodadas
+intercaladas. O andamento fica em ../progresso.json. Retomar não repete rodadas
+já registradas, inclusive falhas. Novas tentativas explícitas de erro 429 são
+medidas dentro de cada rodada; falhas de acesso persistentes interrompem a coleta.

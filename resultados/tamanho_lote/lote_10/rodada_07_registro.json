@@ -1,0 +1,84 @@
+{
+  "job": {
+    "experiment": "tamanho_lote",
+    "condition": "lote_10",
+    "batch_size": 10,
+    "run": 7,
+    "seed": null,
+    "positions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "id": "tamanho_lote/lote_10/rodada_07"
+  },
+  "metrics": {
+    "run": 7,
+    "started_at": "2026-10-15T21:36:36.139601+00:00",
+    "status": "failed",
+    "input_questions": 20,
+    "pending_questions": 20,
+    "classified_questions": 10,
+    "skipped_questions": 0,
+    "batches": 2,
+    "request_attempts": 2,
+    "retries": 0,
+    "failed_requests": 0,
+    "total_seconds": 54.7055429059983,
+    "api_seconds": 29.63704465200135,
+    "batch_wait_seconds": 25.025483596000413,
+    "retry_wait_seconds": 0,
+    "other_seconds": 0.0430146579965367,
+    "seconds_per_question": null,
+    "api_seconds_per_question": null,
+    "questions_per_minute": null,
+    "error": "Exception: DeepSeek retornou content vazio. finish_reason=length",
+    "output_file": "",
+    "failure_category": "empty_response"
+  },
+  "questions": null,
+  "requests": [
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 1,
+      "questions": 10,
+      "seconds": 10.61902763100079
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 2,
+      "questions": 10,
+      "seconds": 19.01801702100056
+    }
+  ],
+  "waits": [
+    {
+      "batch": 2,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025483596000413
+    }
+  ],
+  "finished_at": "2026-10-15T21:37:30.845184+00:00"
+}

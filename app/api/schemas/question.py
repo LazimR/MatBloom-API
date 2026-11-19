@@ -12,6 +12,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
+from app.core.bloom import UNCLASSIFIED_LEVEL, is_classified_level
+
 class QuestionBase(BaseModel):
     """
         Classe base para as questões, contendo os campos comuns.
@@ -20,7 +22,7 @@ class QuestionBase(BaseModel):
             - enunciation: str - Texto da questão.
             - itens: List[str] - Lista de alternativas.
             - correct_item: int - Índice da alternativa correta.
-            - level: int - Nível da Taxonomia de Bloom (1 a 6).
+            - level: int - Nível da Taxonomia de Bloom (0 = não classificado, 1 a 6 = classificado).
             - contents: List[str] - Lista de conteúdos relacionados.
             - dependencies: Optional[List[str]] - Lista de IDs de questões que dependem desta.
     """
@@ -39,7 +41,7 @@ class QuestionCreate(QuestionBase):
             - enunciation: str - Texto da questão.
             - itens: List[str] - Lista de alternativas.
             - correct_item: int - Índice da alternativa correta.
-            - level: int - Nível da Taxonomia de Bloom (1 a 6).
+            - level: int - Nível da Taxonomia de Bloom (0 = não classificado, 1 a 6 = classificado).
             - contents: List[str] - Lista de conteúdos relacionados.
             - dependencies: Optional[List[str]] - Lista de IDs de questões que dependem desta.
     """
@@ -49,8 +51,8 @@ class QuestionCreate(QuestionBase):
             raise ValueError("A questão deve possuir ao menos duas alternativas.")
         if self.correct_item < 0 or self.correct_item >= len(self.itens):
             raise ValueError("correct_item deve apontar para uma alternativa válida.")
-        if self.level < 1 or self.level > 6:
-            raise ValueError("level deve estar entre 1 e 6.")
+        if self.level != UNCLASSIFIED_LEVEL and not is_classified_level(self.level):
+            raise ValueError("level deve ser 0 (não classificado) ou um nível Bloom entre 1 e 6.")
         return self
 
 class QuestionDelete(BaseModel):
@@ -71,7 +73,7 @@ class Question(QuestionBase):
             - enunciation: str - Texto da questão.
             - itens: List[str] - Lista de alternativas.
             - correct_item: int - Índice da alternativa correta.
-            - level: int - Nível da Taxonomia de Bloom (1 a 6).
+            - level: int - Nível da Taxonomia de Bloom (0 = não classificado, 1 a 6 = classificado).
             - contents: List[str] - Lista de conteúdos relacionados.
             - dependencies: Optional[List[str]] - Lista de IDs de questões que dependem desta.
     """

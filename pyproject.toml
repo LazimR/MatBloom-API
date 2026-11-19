@@ -26,10 +26,8 @@ passlib = "^1.7.4"
 bcrypt = "^4.3.0"
 python-multipart = "^0.0.20"
 alembic = "^1.14.1"
+openai = "^2.41.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.requires-plugins]
-poetry-plugin-export = "^1.7.1"

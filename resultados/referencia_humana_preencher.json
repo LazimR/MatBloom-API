@@ -1,0 +1,105 @@
+{
+  "instructions": "Preencha level com o nível definido por você/especialistas (1 a 6). Não use as saídas do modelo como referência humana. Preserve a ordem das 20 questões.",
+  "questions": [
+    {
+      "question_id": "Q001",
+      "enunciation": "Qual é o nome dado ao número que indica quantas vezes a base é multiplicada por ela mesma em uma potência?",
+      "level": null
+    },
+    {
+      "question_id": "Q002",
+      "enunciation": "Qual é a propriedade que afirma que, ao multiplicar potências de mesma base, os expoentes são somados?",
+      "level": null
+    },
+    {
+      "question_id": "Q003",
+      "enunciation": "Em uma potência a^n, qual elemento representa o número que será multiplicado repetidas vezes?",
+      "level": null
+    },
+    {
+      "question_id": "Q004",
+      "enunciation": "Qual é a forma geral utilizada para representar um número em notação científica?",
+      "level": null
+    },
+    {
+      "question_id": "Q005",
+      "enunciation": "Como é chamada a propriedade que afirma que todo número não nulo elevado a zero é igual a 1?",
+      "level": null
+    },
+    {
+      "question_id": "Q006",
+      "enunciation": "A expressão 2 × 2 × 2 × 2 pode ser representada por qual potência?",
+      "level": null
+    },
+    {
+      "question_id": "Q007",
+      "enunciation": "A expressão 5^3 representa qual operação?",
+      "level": null
+    },
+    {
+      "question_id": "Q008",
+      "enunciation": "Por que a expressão 10^3 possui o mesmo valor que 1000?",
+      "level": null
+    },
+    {
+      "question_id": "Q009",
+      "enunciation": "A expressão 3 × 10^4 representa qual número em sua forma decimal?",
+      "level": null
+    },
+    {
+      "question_id": "Q010",
+      "enunciation": "Uma potência de base 2 e expoente 5 pode ser representada por qual expressão?",
+      "level": null
+    },
+    {
+      "question_id": "Q011",
+      "enunciation": "Calcule o valor da potência 2^5.",
+      "level": null
+    },
+    {
+      "question_id": "Q012",
+      "enunciation": "Determine o valor de 4^3.",
+      "level": null
+    },
+    {
+      "question_id": "Q013",
+      "enunciation": "Simplifique a expressão 2^3 × 2^4 utilizando as propriedades da potenciação.",
+      "level": null
+    },
+    {
+      "question_id": "Q014",
+      "enunciation": "Escreva o número 3.000.000 em notação científica.",
+      "level": null
+    },
+    {
+      "question_id": "Q015",
+      "enunciation": "Uma colmeia possui 50 abelhas e sua população dobra a cada mês. Quantas abelhas haverá após 3 meses?",
+      "level": null
+    },
+    {
+      "question_id": "Q016",
+      "enunciation": "A função Q(t) = 5 × 2^t representa o crescimento de uma população. Qual será o valor de Q(4)?",
+      "level": null
+    },
+    {
+      "question_id": "Q017",
+      "enunciation": "Calcule o valor da expressão 2^-3.",
+      "level": null
+    },
+    {
+      "question_id": "Q018",
+      "enunciation": "Resolva a expressão (2^3 × 2^5) ÷ 2^4.",
+      "level": null
+    },
+    {
+      "question_id": "Q019",
+      "enunciation": "Uma estrutura possui 2 peças na primeira etapa e o número de peças dobra a cada etapa seguinte. Quantas peças haverá na sexta etapa?",
+      "level": null
+    },
+    {
+      "question_id": "Q020",
+      "enunciation": "Um investimento segue a fórmula V(t) = 1000 × 1,5^t. Qual será o valor aproximado após 2 anos?",
+      "level": null
+    }
+  ]
+}

@@ -1,0 +1,484 @@
+{
+  "questions": [
+    {
+      "enunciation": "Em uma garagem há 4 carros. Cada carro possui 4 rodas e cada roda possui 6 parafusos. Quantos parafusos há ao todo?",
+      "itens": [
+        "88",
+        "96",
+        "104",
+        "112"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Situação-problema"
+      ]
+    },
+    {
+      "enunciation": "Uma colmeia dobra sua população de abelhas a cada mês. Se ela começou com 60 abelhas, quantas haverá após 3 meses?",
+      "itens": [
+        "420",
+        "440",
+        "460",
+        "480"
+      ],
+      "correct_item": 3,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Crescimento exponencial",
+        "Situação-problema"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de 2^6?",
+      "itens": [
+        "48",
+        "56",
+        "64",
+        "72"
+      ],
+      "correct_item": 2,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Cálculo de potência"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de 3^5?",
+      "itens": [
+        "162",
+        "189",
+        "216",
+        "243"
+      ],
+      "correct_item": 3,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Cálculo de potência"
+      ]
+    },
+    {
+      "enunciation": "A expressão 4 × 4 × 4 × 4 × 4 pode ser escrita como:",
+      "itens": [
+        "4^4",
+        "5^4",
+        "4^5",
+        "20^5"
+      ],
+      "correct_item": 2,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Representação em potência",
+        "Potenciação"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de (0,2)^3?",
+      "itens": [
+        "0,006",
+        "0,008",
+        "0,01",
+        "0,02"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Números decimais",
+        "Potenciação"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de (0,4)^2?",
+      "itens": [
+        "0,12",
+        "0,14",
+        "0,16",
+        "0,18"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Números decimais",
+        "Potenciação"
+      ]
+    },
+    {
+      "enunciation": "Sabendo que todo número não nulo elevado a zero é igual a 1, qual é o valor de 23^0?",
+      "itens": [
+        "0",
+        "1",
+        "23",
+        "230"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Expoente zero",
+        "Propriedades da potenciação"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de 10^5?",
+      "itens": [
+        "10000",
+        "50000",
+        "100000",
+        "1000000"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Potências de base 10",
+        "Potenciação"
+      ]
+    },
+    {
+      "enunciation": "Qual alternativa representa corretamente 3^2 × 3^4?",
+      "itens": [
+        "3^5",
+        "3^6",
+        "9^6",
+        "3^8"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Mesma base"
+      ]
+    },
+    {
+      "enunciation": "Qual alternativa representa corretamente 6^5 ÷ 6^2?",
+      "itens": [
+        "6^2",
+        "6^3",
+        "6^4",
+        "36^3"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Divisão de potências"
+      ]
+    },
+    {
+      "enunciation": "A expressão (2^3)^4 é equivalente a:",
+      "itens": [
+        "2^7",
+        "2^10",
+        "2^12",
+        "8^4"
+      ],
+      "correct_item": 2,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Potência de potência",
+        "Propriedades da potenciação"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de 5^3?",
+      "itens": [
+        "100",
+        "110",
+        "125",
+        "150"
+      ],
+      "correct_item": 2,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Cálculo de potência"
+      ]
+    },
+    {
+      "enunciation": "Em uma plantação há 3 árvores. Cada árvore possui 2 galhos principais, cada galho principal possui 3 ramos e cada ramo possui 2 frutos. Quantos frutos há no total?",
+      "itens": [
+        "30",
+        "36",
+        "42",
+        "48"
+      ],
+      "correct_item": 1,
+      "level": 4,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Situação-problema"
+      ]
+    },
+    {
+      "enunciation": "Uma bactéria triplica sua quantidade a cada hora. Se inicialmente há 3 bactérias, quantas haverá após 4 horas?",
+      "itens": [
+        "162",
+        "189",
+        "216",
+        "243"
+      ],
+      "correct_item": 3,
+      "level": 4,
+      "contents": [
+        "Exponenciação",
+        "Crescimento exponencial",
+        "Situação-problema"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de (-3)^4?",
+      "itens": [
+        "27",
+        "54",
+        "81",
+        "108"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Potência de número negativo"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de (-3)^3?",
+      "itens": [
+        "-81",
+        "-27",
+        "27",
+        "81"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Potência de número negativo"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de 1^40?",
+      "itens": [
+        "0",
+        "1",
+        "40",
+        "140"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Casos particulares"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de 5^2 + 3^3?",
+      "itens": [
+        "48",
+        "50",
+        "52",
+        "54"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Operações com potências"
+      ]
+    },
+    {
+      "enunciation": "Em notação científica, o número 5000000 pode ser escrito como:",
+      "itens": [
+        "5 × 10^5",
+        "5 × 10^6",
+        "50 × 10^5",
+        "0,5 × 10^7"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Notação científica",
+        "Potências de base 10"
+      ]
+    },
+    {
+      "enunciation": "Em notação científica, o número 0,00072 pode ser escrito como:",
+      "itens": [
+        "7,2 × 10^-4",
+        "72 × 10^-5",
+        "7,2 × 10^4",
+        "0,72 × 10^-3"
+      ],
+      "correct_item": 0,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Notação científica",
+        "Potências de base 10"
+      ]
+    },
+    {
+      "enunciation": "Considere f(x) = 2^x. Qual é o valor de f(6)?",
+      "itens": [
+        "32",
+        "48",
+        "64",
+        "96"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Função exponencial",
+        "Cálculo"
+      ]
+    },
+    {
+      "enunciation": "Considere f(x) = 4^x. Qual é o valor de f(0)?",
+      "itens": [
+        "0",
+        "1",
+        "4",
+        "16"
+      ],
+      "correct_item": 1,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Função exponencial",
+        "Expoente zero"
+      ]
+    },
+    {
+      "enunciation": "Se 2^x = 64, então o valor de x é:",
+      "itens": [
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Equação exponencial",
+        "Potenciação"
+      ]
+    },
+    {
+      "enunciation": "Se 10^x = 10000, então o valor de x é:",
+      "itens": [
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Equação exponencial",
+        "Potências de base 10"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de 6 × 6^2?",
+      "itens": [
+        "6^2",
+        "6^3",
+        "12^2",
+        "36^2"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Mesma base"
+      ]
+    },
+    {
+      "enunciation": "Qual alternativa é equivalente a 7^2 × 7^3 ÷ 7^4?",
+      "itens": [
+        "7",
+        "7^2",
+        "7^3",
+        "7^5"
+      ],
+      "correct_item": 0,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Operações com potências"
+      ]
+    },
+    {
+      "enunciation": "Uma folha de papel é dobrada ao meio sucessivamente. Se a espessura dobra a cada dobra e a espessura inicial é 1 unidade, qual será a espessura após 7 dobras?",
+      "itens": [
+        "64",
+        "96",
+        "128",
+        "256"
+      ],
+      "correct_item": 2,
+      "level": 4,
+      "contents": [
+        "Exponenciação",
+        "Crescimento exponencial",
+        "Situação-problema"
+      ]
+    },
+    {
+      "enunciation": "Qual é o valor de (3^2) × (2^2)?",
+      "itens": [
+        "5^2",
+        "6^2",
+        "12^2",
+        "9^2"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Produto de potências"
+      ]
+    },
+    {
+      "enunciation": "Em uma cultura de microrganismos, a quantidade é dada por Q(t) = 6 · 2^t. Qual será a quantidade quando t = 4?",
+      "itens": [
+        "72",
+        "84",
+        "96",
+        "108"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Função exponencial",
+        "Situação-problema"
+      ]
+    }
+  ]
+}

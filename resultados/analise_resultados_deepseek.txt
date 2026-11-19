@@ -1,0 +1,291 @@
+ANÁLISE DOS RESULTADOS DE CLASSIFICAÇÃO DE BLOOM — MATBLOOM
+Dados coletados em 15/10/2026
+
+O principal achado é que o tempo do fluxo de classificação, nos conjuntos com
+várias questões, foi dominado pelas pausas programadas entre chamadas. Assim,
+os resultados caracterizam o desempenho do MatBloom com lotes de duas questões
+e intervalo de 25 segundos, incluindo a comunicação com a DeepSeek. Eles não
+representam apenas o tempo de inferência do modelo.
+
+1. OBJETIVO E DADOS ANALISADOS
+
+O experimento avaliou o tempo de classificação de conjuntos de 1, 5, 10, 20 e
+30 questões. Foram realizadas dez execuções por conjunto. A análise utiliza os
+arquivos *_metrics.csv, *_requests.csv, *_waits.csv, *_summary.json e os JSONs
+com as classificações, na pasta MatBloom-API/resultados.
+
+No total, os arquivos registram:
+- 50 execuções: 49 bem-sucedidas e uma com falha;
+- 326 tentativas de chamada: 325 com código 200 e uma com timeout;
+- 630 classificações concluídas, contando as repetições e a sobreposição entre
+  conjuntos. Isso não corresponde a 630 questões distintas: há 30 distintas;
+- 276 pausas entre lotes;
+- nenhuma nova tentativa e nenhuma espera decorrente de erro 429 registrada.
+
+As medições ocorreram aproximadamente entre 11h26 e 14h07, no horário de
+Fortaleza (UTC-3). Os cinco conjuntos foram executados em períodos sucessivos.
+
+2. CONFIGURAÇÃO EFETIVAMENTE REGISTRADA
+
+Os cinco resumos registram a mesma configuração relevante:
+- Provedor: DeepSeek.
+- Modelo: deepseek-v4-flash.
+- Temperatura: 0,1.
+- Limite máximo de tokens de conclusão: 3.000.
+- Modo de raciocínio estendido (thinking): desativado.
+- Tamanho do lote: duas questões por chamada, com lote final menor quando
+  necessário.
+- Intervalo configurado entre lotes: 25 segundos.
+- Limite configurado de tentativas por lote: cinco.
+- Novas tentativas automáticas internas do SDK: desativadas no experimento.
+- Python: 3.12.3; plataforma Linux x86_64; cpu_count registrado: 12.
+
+Os hashes registrados do classificador e das definições de Bloom também são
+iguais entre as condições. Os hashes das entradas conferem com os arquivos
+atualmente disponíveis. Os conjuntos menores são as primeiras questões do
+conjunto de 30, preservando a ordem.
+
+Importante: o conjunto de 30 questões não foi enviado inteiro ao modelo em uma
+chamada. Cada execução concluída desse conjunto fez 15 chamadas sequenciais,
+com duas questões em cada uma.
+
+3. TEMPO TOTAL POR EXECUÇÃO
+
+Os valores abaixo consideram apenas execuções bem-sucedidas. Para 30 questões,
+portanto, há nove observações de tempo de conclusão. Os demais grupos têm dez.
+DP significa desvio padrão amostral. Todos os tempos estão em segundos.
+
+Questões | Sucessos | Média   | Mediana | DP    | Mínimo  | Máximo
+---------|----------|---------|---------|-------|---------|--------
+       1 |    10/10 |   2,016 |   1,929 | 0,276 |   1,710 |   2,637
+       5 |    10/10 |  62,810 |  60,097 | 4,729 |  58,529 |  72,790
+      10 |    10/10 | 121,614 | 120,395 | 4,385 | 117,231 | 130,880
+      20 |    10/10 | 262,768 | 261,859 | 3,530 | 259,157 | 269,351
+      30 |     9/10 | 416,102 | 415,925 | 5,476 | 408,666 | 423,498
+
+Na configuração testada, o tempo médio passou de aproximadamente dois segundos
+para uma questão a seis minutos e 56 segundos para 30 questões. Para cinco,
+dez e 20 questões, as médias foram aproximadamente 1min03s, 2min02s e 4min23s.
+
+O aumento do tempo acompanha o aumento do número de chamadas e, sobretudo,
+das pausas entre elas. A comparação entre uma e cinco questões é especialmente
+afetada por isso: uma questão não exige pausa entre lotes; cinco exigem duas.
+
+4. DECOMPOSIÇÃO DO TEMPO: CHAMADAS, PAUSAS E PROCESSAMENTO LOCAL
+
+Médias por execução bem-sucedida, em segundos:
+
+Questões | Chamadas | Tempo API | Pausas  | Outros | Pausas / total
+---------|----------|-----------|---------|--------|---------------
+       1 |        1 |     1,988 |   0,000 |  0,029 |          0,00%
+       5 |        3 |    12,698 |  50,044 |  0,068 |         79,67%
+      10 |        5 |    21,408 | 100,094 |  0,112 |         82,30%
+      20 |       10 |    37,348 | 225,199 |  0,221 |         85,70%
+      30 |       15 |    65,482 | 350,284 |  0,336 |         84,18%
+
+"Tempo API" é a soma dos tempos das tentativas de chamada. Inclui rede e
+processamento do cliente/SDK; não isola o processamento no servidor da DeepSeek.
+"Outros" é o tempo restante dentro da classificação, incluindo trabalho local
+e preparação/encerramento de recursos. Leitura da entrada e gravação dos
+arquivos de resultado não integram o tempo total medido pelo script.
+
+Com lotes de duas questões e sem novas tentativas, a pausa programada esperada
+é: 25 x (arredondamento para cima de N/2 - 1). Para os conjuntos testados, isso
+produz 0, 50, 100, 225 e 350 segundos. Os valores medidos conferem com essa
+regra; os pequenos excedentes refletem a duração efetiva das esperas.
+
+Portanto, entre cinco e 30 questões, aproximadamente 80% a 86% do tempo total
+foi dedicado à política de intervalo entre chamadas. O processamento local
+residual representou menos de 0,11% do total nesses quatro grupos.
+
+Para 30 questões, retirar aritmeticamente as pausas do tempo observado deixa
+65,818 segundos, dos quais 65,482 correspondem às chamadas. Essa decomposição
+não é um resultado de teste sem pausas: reduzir o intervalo pode modificar o
+comportamento do serviço e precisa de uma execução própria para ser avaliado.
+
+5. TEMPO AMORTIZADO POR QUESTÃO E PRODUTIVIDADE
+
+Questões | Total por questão | API por questão | Questões/minuto
+---------|-------------------|-----------------|----------------
+       1 |           2,016 s |         1,988 s |          29,755
+       5 |          12,562 s |         2,540 s |           4,776
+      10 |          12,161 s |         2,141 s |           4,934
+      20 |          13,138 s |         1,867 s |           4,567
+      30 |          13,870 s |         2,183 s |           4,326
+
+O tempo por questão é amortizado: divide o tempo do conjunto pelo número de
+questões concluídas. Com várias questões por chamada, ele não corresponde ao
+tempo que uma questão isolada levou para ser respondida.
+
+A produtividade desta tabela foi calculada como o número total de questões
+concluídas dividido pela soma dos tempos das execuções bem-sucedidas, vezes
+60. Ela difere levemente da média aritmética da coluna questions_per_minute
+nos CSVs, pois são formas distintas de agregação.
+
+Os conjuntos de cinco a 30 questões apresentaram aproximadamente 4,3 a 4,9
+questões por minuto no fluxo medido. A queda em relação ao conjunto unitário
+está fortemente associada às pausas entre lotes. Os tempos de API amortizados,
+por sua vez, ficaram entre aproximadamente 1,87 e 2,54 segundos por questão.
+Não há melhora monotônica dessa medida com o tamanho do conjunto.
+
+Esses dados não comparam tamanhos diferentes de lote: o lote permaneceu em
+duas questões. Portanto, não permitem concluir qual quantidade de questões por
+chamada seria mais eficiente, nem a capacidade máxima de processamento da API.
+
+6. VARIAÇÃO ENTRE EXECUÇÕES
+
+O coeficiente de variação (DP dividido pela média, em percentual) do tempo
+total foi de 13,70%, 7,53%, 3,61%, 1,34% e 1,32%, respectivamente, para os
+conjuntos de 1, 5, 10, 20 e 30 questões.
+
+Essa redução da variação relativa do total precisa ser interpretada junto à
+decomposição dos tempos. A presença de uma parcela grande e quase fixa de
+espera reduz o peso relativo das oscilações das chamadas. Para o tempo de API,
+os coeficientes foram 13,05%, 37,24%, 20,49%, 9,48% e 8,33%.
+
+No grupo de cinco questões, por exemplo, o tempo de API por execução variou
+entre 8,423 e 22,675 segundos. Embora todas as execuções desse grupo tenham
+terminado, houve variação relevante na duração das chamadas.
+
+Assim, um tempo total relativamente estável nos grupos maiores não demonstra,
+por si só, igual estabilidade do serviço externo. Com nove ou dez conclusões
+por condição, esta análise é descritiva e não estima com precisão eventos
+raros ou percentis extremos.
+
+7. FALHA OBSERVADA E COMPORTAMENTO DAS NOVAS TENTATIVAS
+
+Houve uma falha na repetição 2 do conjunto de 30 questões:
+- Erro: APITimeoutError: Request timed out.
+- Tempo total até a falha: 5,029 segundos.
+- Tempo da tentativa de chamada: 5,007 segundos.
+- Lote: primeiro; duas questões previstas na chamada.
+- Questões concluídas naquela execução: zero.
+- Código HTTP: não registrado.
+- Novas tentativas: zero.
+
+O script registrou a falha e continuou as repetições seguintes. O grupo de 30
+questões terminou com 90% de sucesso nas execuções, e o conjunto completo do
+experimento, com 98% (49 de 50). Das 326 tentativas de chamada, uma falhou,
+representando aproximadamente 0,31% das tentativas observadas.
+
+Esses percentuais descrevem esta coleta e não são estimativas consolidadas
+da disponibilidade geral da DeepSeek. A falha ocorreu no primeiro lote de
+duas questões; portanto, não comprova uma limitação do modelo para conjuntos
+de 30 questões. Os logs também não permitem determinar a causa exata do timeout.
+
+Apesar do limite configurado de cinco tentativas, o código faz repetição
+explícita para limitação de requisições (429), mas não para APITimeoutError.
+Como as novas tentativas internas do SDK estavam desativadas, esse timeout
+encerrou a execução sem repetição da chamada. Isso explica o retries igual
+a zero e indica uma possibilidade de melhoria futura no tratamento de falhas.
+
+O tempo de 5,029 segundos dessa falha foi excluído da média de tempo para
+concluir 30 questões. Incluí-lo como se fosse uma execução concluída reduziria
+artificialmente a média. A falha permanece contabilizada na taxa de sucesso.
+
+8. CONSISTÊNCIA DAS CLASSIFICAÇÕES OBSERVADAS
+
+Além dos tempos, foram comparados os níveis retornados para cada posição
+entre as repetições concluídas do mesmo conjunto.
+
+Questões | Repetições válidas | Posições com nível idêntico em todas elas
+---------|--------------------|------------------------------------------
+       1 |                 10 |  1 de  1 (100,00%)
+       5 |                 10 |  5 de  5 (100,00%)
+      10 |                 10 |  9 de 10 ( 90,00%)
+      20 |                 10 | 20 de 20 (100,00%)
+      30 |                  9 | 29 de 30 ( 96,67%)
+
+Foram encontradas duas questões com variação:
+
+a) Posição 9, conjunto de dez questões:
+   "A expressão 3 × 10^4 representa qual número em sua forma decimal?"
+   Nível 3 em nove execuções e nível 2 em uma.
+   Nos conjuntos de 20 e 30 questões, essa posição recebeu nível 3 em todas
+   as execuções concluídas. Ao agregar as condições em que apareceu, foram
+   28 classificações no nível 3 e uma no nível 2.
+
+b) Posição 24, conjunto de 30 questões:
+   "Observe a expressão (2^3 × 2^4) ÷ 2^5. Qual sequência de propriedades deve
+   ser aplicada para simplificá-la corretamente?"
+   Nível 4 em oito execuções e nível 2 em uma.
+
+A estabilidade foi alta neste conjunto, mas não absoluta, mesmo com
+temperatura 0,1. As duas questões podem ser priorizadas para revisão docente.
+Essas contagens medem consistência, não acurácia: repetir o mesmo nível não
+demonstra que ele corresponde ao nível pedagógico correto. O cálculo de
+acurácia exige comparação com classificações de referência feitas por
+especialistas, não presentes nestes relatórios.
+
+9. CONFERÊNCIA DOS ARQUIVOS
+
+Foram recalculadas as médias, medianas e desvios padrão a partir dos CSVs e
+comparados os resultados com os resumos JSON. Também foram conferidos:
+- o número de tentativas por execução;
+- as somas dos tempos de chamadas e de esperas contra as métricas por execução;
+- a decomposição do tempo total;
+- a quantidade de questões nos JSONs das execuções bem-sucedidas;
+- a preservação de enunciados, alternativas, respostas corretas e conteúdos;
+- a validade dos níveis retornados, entre 1 e 6;
+- os hashes das entradas e as relações entre os subconjuntos.
+
+Não foram encontradas divergências nessas verificações. O conjunto de 30
+questões tem nove resultados completos, coerentemente com a falha registrada
+na segunda repetição.
+
+10. LIMITAÇÕES E INTERPRETAÇÃO PARA O TCC
+
+Os resultados sustentam conclusões sobre o fluxo testado, com estas condições:
+
+- Há apenas um provedor e um modelo nesta coleta. Não há base aqui para
+  comparação de desempenho com Groq ou com outros modelos.
+- Os conjuntos são prefixos de uma mesma lista, não amostras aleatórias ou
+  equilibradas por tipo de questão. Os enunciados e as alternativas também
+  diferem em extensão. A composição pode influenciar os tempos.
+- Cada tamanho foi executado em um período próprio, sem alternância entre
+  tamanhos. Horário, rede e condições do provedor podem afetar a comparação.
+- As chamadas são sequenciais. O experimento não mede concorrência, teste
+  de carga, limite de usuários ou vazão máxima do serviço.
+- O intervalo de 25 segundos permaneceu fixo. A coleta não estabelece qual
+  intervalo é necessário nem testa o resultado de removê-lo.
+- O tempo de API inclui rede e SDK; não é uma medição isolada da inferência.
+- A produtividade reportada considera as execuções concluídas. As falhas
+  foram analisadas separadamente.
+- A análise não mede correção por imagem, usabilidade, ganho de aprendizagem
+  nem economia de tempo do professor.
+
+Com base nisso, uma redação possível para a discussão do TCC é:
+
+"Na avaliação de desempenho temporal do MatBloom, foram realizadas dez
+execuções para cada conjunto de 1, 5, 10, 20 e 30 questões, utilizando o modelo
+deepseek-v4-flash, lotes de duas questões e intervalo de 25 segundos entre
+chamadas. Das 50 execuções, 49 foram concluídas. O tempo médio de conclusão
+variou de 2,016 segundos para uma questão a 416,102 segundos para 30 questões.
+Nos conjuntos com cinco ou mais questões, as pausas programadas representaram
+entre 79,67% e 85,70% do tempo total. Assim, o crescimento observado refletiu
+principalmente a política de processamento sequencial e de intervalo entre
+requisições. A coleta também identificou uma falha por timeout e variações
+pontuais nos níveis atribuídos, mostrando a importância de analisar tempo,
+sucesso operacional e consistência como medidas distintas."
+
+Uma próxima avaliação pode variar o intervalo entre chamadas ou o tamanho do
+lote, mantendo o mesmo conjunto de entrada. Isso permitiria investigar uma
+possível redução do tempo e seus efeitos nas falhas e nas classificações.
+Qualquer melhoria deve ser medida em uma nova coleta, preservando estes
+resultados como referência da configuração aqui descrita.
+
+FONTES LOCAIS
+
+- resultados/{1,5,10,20,30}questao_deepseek_metrics.csv
+- resultados/{1,5,10,20,30}questao_deepseek_requests.csv
+- resultados/{1,5,10,20,30}questao_deepseek_waits.csv
+- resultados/{1,5,10,20,30}questao_deepseek_summary.json
+- resultados/{1,5,10,20,30}questao_deepseek_<repetição>.json
+- scripts/questoes/quest_1.json, quest_5.json, quest_10.json, quest_20.json e quest.json
+- scripts/classify_questions_repeat.py
+- app/api/services/question_classifier.py
+
+Os números deste texto foram calculados a partir dos arquivos locais, sem
+novas chamadas às APIs. Os tempos das tabelas foram arredondados para três
+casas decimais; pequenas diferenças na soma dos valores exibidos podem decorrer
+desse arredondamento.

@@ -1,0 +1,657 @@
+{
+  "job": {
+    "experiment": "tamanho_lote",
+    "condition": "lote_1",
+    "batch_size": 1,
+    "run": 7,
+    "seed": null,
+    "positions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "id": "tamanho_lote/lote_1/rodada_07"
+  },
+  "metrics": {
+    "run": 7,
+    "started_at": "2026-10-15T21:37:30.882437+00:00",
+    "status": "success",
+    "input_questions": 20,
+    "pending_questions": 20,
+    "classified_questions": 20,
+    "skipped_questions": 0,
+    "batches": 20,
+    "request_attempts": 20,
+    "retries": 0,
+    "failed_requests": 0,
+    "total_seconds": 529.1123337710014,
+    "api_seconds": 53.2518621180061,
+    "batch_wait_seconds": 475.423476631011,
+    "retry_wait_seconds": 0,
+    "other_seconds": 0.4369950219843304,
+    "seconds_per_question": 26.455616688550073,
+    "api_seconds_per_question": 2.662593105900305,
+    "questions_per_minute": 2.267949400172851,
+    "error": "",
+    "output_file": "/home/lazimr/Documentos/github/MatBloom/MatBloom-API/resultados/tamanho_lote/lote_1/rodada_07_resultado.json",
+    "failure_category": ""
+  },
+  "questions": [
+    {
+      "enunciation": "Qual é o nome dado ao número que indica quantas vezes a base é multiplicada por ela mesma em uma potência?",
+      "itens": [
+        "Base",
+        "Expoente",
+        "Produto",
+        "Fator"
+      ],
+      "correct_item": 1,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Elementos da potência",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Qual é a propriedade que afirma que, ao multiplicar potências de mesma base, os expoentes são somados?",
+      "itens": [
+        "Potência de potência",
+        "Produto de potências de mesma base",
+        "Divisão de potências",
+        "Expoente zero"
+      ],
+      "correct_item": 1,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Em uma potência a^n, qual elemento representa o número que será multiplicado repetidas vezes?",
+      "itens": [
+        "Expoente",
+        "Resultado",
+        "Base",
+        "Índice"
+      ],
+      "correct_item": 2,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Elementos da potência",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Qual é a forma geral utilizada para representar um número em notação científica?",
+      "itens": [
+        "a × 10^n, com 1 ≤ a < 10",
+        "10^a × n",
+        "a^n × 10",
+        "n × a^10"
+      ],
+      "correct_item": 0,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Notação científica",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Como é chamada a propriedade que afirma que todo número não nulo elevado a zero é igual a 1?",
+      "itens": [
+        "Expoente negativo",
+        "Potência de potência",
+        "Propriedade do expoente zero",
+        "Produto de potências"
+      ],
+      "correct_item": 2,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Expoente zero",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "A expressão 2 × 2 × 2 × 2 pode ser representada por qual potência?",
+      "itens": [
+        "2^2",
+        "2^3",
+        "2^4",
+        "4^2"
+      ],
+      "correct_item": 2,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Representação em potência",
+        "Interpretação"
+      ]
+    },
+    {
+      "enunciation": "A expressão 5^3 representa qual operação?",
+      "itens": [
+        "5 + 5 + 5",
+        "5 × 5 × 5",
+        "5 × 3",
+        "3 × 3 × 3 × 3 × 3"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Representação em potência",
+        "Interpretação"
+      ]
+    },
+    {
+      "enunciation": "Por que a expressão 10^3 possui o mesmo valor que 1000?",
+      "itens": [
+        "Porque 10 é somado três vezes",
+        "Porque 10 é multiplicado por ele mesmo três vezes",
+        "Porque 10 é multiplicado por 3",
+        "Porque o expoente representa uma divisão"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Potenciação",
+        "Interpretação de conceitos"
+      ]
+    },
+    {
+      "enunciation": "A expressão 3 × 10^4 representa qual número em sua forma decimal?",
+      "itens": [
+        "300",
+        "3000",
+        "30000",
+        "300000"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Notação científica",
+        "Interpretação"
+      ]
+    },
+    {
+      "enunciation": "Uma potência de base 2 e expoente 5 pode ser representada por qual expressão?",
+      "itens": [
+        "5^2",
+        "2^5",
+        "2 × 5",
+        "5 × 5"
+      ],
+      "correct_item": 1,
+      "level": 2,
+      "contents": [
+        "Exponenciação",
+        "Representação em potência",
+        "Interpretação"
+      ]
+    },
+    {
+      "enunciation": "Calcule o valor da potência 2^5.",
+      "itens": [
+        "10",
+        "25",
+        "32",
+        "64"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Cálculo de potências",
+        "Potenciação"
+      ]
+    },
+    {
+      "enunciation": "Determine o valor de 4^3.",
+      "itens": [
+        "12",
+        "16",
+        "64",
+        "81"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Cálculo de potências",
+        "Potenciação"
+      ]
+    },
+    {
+      "enunciation": "Simplifique a expressão 2^3 × 2^4 utilizando as propriedades da potenciação.",
+      "itens": [
+        "2^7",
+        "2^12",
+        "4^7",
+        "8^4"
+      ],
+      "correct_item": 0,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Produto de potências"
+      ]
+    },
+    {
+      "enunciation": "Escreva o número 3.000.000 em notação científica.",
+      "itens": [
+        "3 × 10^6",
+        "30 × 10^5",
+        "0,3 × 10^7",
+        "3 × 10^5"
+      ],
+      "correct_item": 0,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Notação científica",
+        "Conversão de números"
+      ]
+    },
+    {
+      "enunciation": "Uma colmeia possui 50 abelhas e sua população dobra a cada mês. Quantas abelhas haverá após 3 meses?",
+      "itens": [
+        "150",
+        "200",
+        "400",
+        "800"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Crescimento exponencial",
+        "Problemas contextualizados"
+      ]
+    },
+    {
+      "enunciation": "A função Q(t) = 5 × 2^t representa o crescimento de uma população. Qual será o valor de Q(4)?",
+      "itens": [
+        "40",
+        "80",
+        "100",
+        "160"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Função exponencial",
+        "Substituição de valores",
+        "Cálculo de funções"
+      ]
+    },
+    {
+      "enunciation": "Calcule o valor da expressão 2^-3.",
+      "itens": [
+        "-8",
+        "8",
+        "1/8",
+        "1/6"
+      ],
+      "correct_item": 2,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Expoente negativo",
+        "Propriedades da potenciação"
+      ]
+    },
+    {
+      "enunciation": "Resolva a expressão (2^3 × 2^5) ÷ 2^4.",
+      "itens": [
+        "2^4",
+        "2^8",
+        "2^12",
+        "16^2"
+      ],
+      "correct_item": 0,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Expressões com potências"
+      ]
+    },
+    {
+      "enunciation": "Uma estrutura possui 2 peças na primeira etapa e o número de peças dobra a cada etapa seguinte. Quantas peças haverá na sexta etapa?",
+      "itens": [
+        "32",
+        "64",
+        "128",
+        "256"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Exponenciação",
+        "Progressão de crescimento",
+        "Problemas contextualizados"
+      ]
+    },
+    {
+      "enunciation": "Um investimento segue a fórmula V(t) = 1000 × 1,5^t. Qual será o valor aproximado após 2 anos?",
+      "itens": [
+        "1500",
+        "2250",
+        "2500",
+        "3000"
+      ],
+      "correct_item": 1,
+      "level": 3,
+      "contents": [
+        "Função exponencial",
+        "Crescimento financeiro",
+        "Aplicação de fórmulas"
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 1,
+      "questions": 1,
+      "seconds": 2.2480290420062374
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 2,
+      "questions": 1,
+      "seconds": 2.9563785630016355
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 3,
+      "questions": 1,
+      "seconds": 5.367426466997131
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 4,
+      "questions": 1,
+      "seconds": 2.088249170999916
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 5,
+      "questions": 1,
+      "seconds": 2.5452637069975026
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 6,
+      "questions": 1,
+      "seconds": 3.1879969549991074
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 7,
+      "questions": 1,
+      "seconds": 2.170205064001493
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 8,
+      "questions": 1,
+      "seconds": 2.278439759000321
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 9,
+      "questions": 1,
+      "seconds": 3.487995094001235
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 10,
+      "questions": 1,
+      "seconds": 2.3722706730040954
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 11,
+      "questions": 1,
+      "seconds": 2.1567311199978576
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 12,
+      "questions": 1,
+      "seconds": 1.3862576620012987
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 13,
+      "questions": 1,
+      "seconds": 3.980621749004058
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 14,
+      "questions": 1,
+      "seconds": 2.8291844360064715
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 15,
+      "questions": 1,
+      "seconds": 2.960065786995983
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 16,
+      "questions": 1,
+      "seconds": 2.0291449180003838
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 17,
+      "questions": 1,
+      "seconds": 1.5207691069954308
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 18,
+      "questions": 1,
+      "seconds": 3.34708029399917
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 19,
+      "questions": 1,
+      "seconds": 2.668796724996355
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 20,
+      "questions": 1,
+      "seconds": 1.6709558250004193
+    }
+  ],
+  "waits": [
+    {
+      "batch": 2,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.020462467997277
+    },
+    {
+      "batch": 3,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025410216003365
+    },
+    {
+      "batch": 4,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.02543877199787
+    },
+    {
+      "batch": 5,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.016161020001164
+    },
+    {
+      "batch": 6,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.009772776000318
+    },
+    {
+      "batch": 7,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.022305471000436
+    },
+    {
+      "batch": 8,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.023687893997703
+    },
+    {
+      "batch": 9,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025236765002774
+    },
+    {
+      "batch": 10,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025353094999446
+    },
+    {
+      "batch": 11,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025431326997932
+    },
+    {
+      "batch": 12,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.02539593000256
+    },
+    {
+      "batch": 13,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025444326005527
+    },
+    {
+      "batch": 14,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.016944912000326
+    },
+    {
+      "batch": 15,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.02550700899883
+    },
+    {
+      "batch": 16,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025414615003683
+    },
+    {
+      "batch": 17,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.016602946001512
+    },
+    {
+      "batch": 18,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025404553001863
+    },
+    {
+      "batch": 19,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025425571002415
+    },
+    {
+      "batch": 20,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.018076964996
+    }
+  ],
+  "finished_at": "2026-10-15T21:46:20.061013+00:00"
+}

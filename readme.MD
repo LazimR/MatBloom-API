@@ -223,3 +223,51 @@ Estado atual da suíte:
 - a suíte pode ser executada localmente com `poetry run pytest -q`, sem depender de `PYTHONPATH=.`
 - as mudanças de modelagem já feitas no código exigem migração real no PostgreSQL
 - o fluxo de OCR/correção automática já foi estabilizado, mas ainda vale aprofundar os testes dessa parte
+
+## Experimento de tempo de classificação de Bloom
+
+Edite manualmente `scripts/quest.json` para conter a quantidade desejada de questões
+(por exemplo: 1, 5, 10, 20 ou 30) e execute o script a partir de `MatBloom-API`:
+
+```bash
+poetry run python scripts/classify_questions_repeat.py scripts/quest.json 10 --provider deepseek -o resultados/5questoes_deepseek.json
+```
+
+O número `10` é a quantidade de repetições. Troque o nome da saída a cada condição
+do experimento para preservar os resultados anteriores. O script lê a entrada uma
+vez por execução do comando e usa as mesmas questões em todas as repetições.
+Por padrão, classifica somente questões com `level: 0`; use `--force` para
+reclassificar também questões já classificadas. Execuções sem questões pendentes
+recebem o status `skipped` e não entram nas estatísticas de tempo.
+
+O provedor padrão deste script é `deepseek`. Para Groq, informe `--provider groq`.
+Modelo, temperatura, tamanho do lote e limite de tentativas vêm do `.env`.
+O argumento `--delay` substitui a pausa entre lotes; as pausas por limite da API
+continuam seguindo a configuração de novas tentativas. No experimento, as novas
+tentativas automáticas internas do SDK são desativadas para que cada chamada
+seja registrada; a repetição explícita para erros 429 continua ativa.
+
+Para o nome de saída acima, são produzidos:
+
+| Arquivo | Conteúdo |
+| --- | --- |
+| `5questoes_deepseek_1.json`, `_2.json`, etc. | Questões classificadas em cada repetição concluída |
+| `5questoes_deepseek_metrics.csv` | Uma linha por execução, com status, tempos, contagens, falhas e produtividade |
+| `5questoes_deepseek_requests.csv` | Uma linha por tentativa de API, com lote, duração e código HTTP ou erro |
+| `5questoes_deepseek_waits.csv` | Esperas solicitadas e medidas, separadas entre lotes e limite da API |
+| `5questoes_deepseek_summary.json` | Configurações, identificação da entrada e do código, resultados e estatísticas |
+
+Todos os tempos estão em segundos. `total_seconds` mede a classificação completa,
+incluindo validação e esperas, e exclui leitura e gravação dos arquivos.
+`api_seconds` soma todas as tentativas, inclusive as que retornam erro.
+`batch_wait_seconds` e `retry_wait_seconds` registram separadamente as esperas
+efetivamente medidas. `other_seconds` é o tempo restante de processamento local.
+`seconds_per_question` é o tempo total dividido pelo número de questões
+classificadas naquela execução; é uma medida amortizada, não a latência individual
+de uma questão quando há várias no mesmo lote.
+
+As estatísticas incluem média, mediana, desvio padrão amostral, mínimo e máximo
+somente das execuções bem-sucedidas que classificaram questões. O desvio padrão
+fica `null` com menos de duas execuções válidas. As falhas ficam nos relatórios,
+as próximas repetições continuam e o comando retorna código 1 se houve falha.
+Os relatórios são atualizados após cada repetição.

@@ -809,18 +809,6 @@ def test_get_classroom_analysis(client, monkeypatch):
     assert response.json()["student_count"] == 25
 
 
-def test_generate_student_reinforcement(client, monkeypatch):
-    app.dependency_overrides[auth.require_user] = lambda: {"role": "professor", "user_id": 9}
-    app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "professor", "user_id": 9}
-
-    monkeypatch.setattr(student_endpoint, "ensure_student_scope", lambda *_args, **_kwargs: None)
-
-    response = client.post("/student/7/analysis/reinforcement")
-
-    assert response.status_code == 410
-    assert "descontinuada" in response.json()["detail"]
-
-
 def test_teacher_can_generate_pdf_for_individual_application_without_headers(client, monkeypatch):
     app.dependency_overrides[auth.require_user] = lambda: {"role": "professor", "user_id": 9}
     app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "professor", "user_id": 9}

@@ -1,0 +1,18 @@
+[
+  {
+    "enunciation": "Qual é o nome dado ao número que indica quantas vezes a base é multiplicada por ela mesma em uma potência?",
+    "itens": [
+      "Base",
+      "Expoente",
+      "Produto",
+      "Fator"
+    ],
+    "correct_item": 1,
+    "level": 0,
+    "contents": [
+      "Exponenciação",
+      "Elementos da potência",
+      "Conceitos básicos"
+    ]
+  }
+]

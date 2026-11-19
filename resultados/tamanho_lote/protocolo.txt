@@ -1,0 +1,40 @@
+EXPERIMENTO: TAMANHO DO LOTE
+
+Entrada: as mesmas 20 questões de scripts/questoes/quest_20.json.
+Condições: 1, 2, 5 e 10 questões por chamada, com dez repetições por condição.
+Modelo, temperatura, limite de tokens e intervalo entre chamadas seguem o .env
+e ficam registrados em ../experimentos_manifest.json. O arquivo .env não é alterado.
+
+Cada repetição pertence a um bloco. A ordem de execução das quatro condições
+e da condição embaralhada do segundo experimento é sorteada com semente fixa.
+Isso reduz a associação entre condição e horário de execução.
+
+Medidas: tempo total e de API por execução e por questão, pausas, sucesso,
+falhas, novas tentativas, respostas inválidas/incompletas e diferenças de nível
+em relação à condição lote_2 do mesmo bloco. Acurácia fica pendente enquanto
+não houver arquivo com níveis de referência humana.
+
+Os arquivos rodada_XX_entrada.json registram a entrada e as posições originais;
+rodada_XX_resultado.json contém as classificações concluídas; rodada_XX_registro.json
+contém os tempos, as tentativas de API e as esperas, inclusive quando há falha.
+metricas.csv, por_questao.csv, requests.csv, waits.csv, resumo.json e analise.txt
+são atualizados a cada rodada concluída.
+
+As métricas de tempo agregadas excluem execuções com falha. As falhas são
+contabilizadas separadamente. Concordância com lote_2 não é acurácia.
+As 20 questões são as mesmas em todas as condições: 800 classificações previstas
+não correspondem a 800 questões distintas.
+
+Execução ou retomada, dentro de MatBloom-API:
+poetry run python scripts/run_classification_experiments.py
+
+Retomar preserva e pula rodadas já registradas, inclusive as que falharam.
+Não execute outra coleta simultânea na mesma pasta.
+Para outra configuração, use --output resultados/nova_coleta.
+O andamento fica em ../progresso.json.
+
+Para atualizar as análises com referência humana, depois da coleta:
+poetry run python scripts/run_classification_experiments.py --analyze-only --reference CAMINHO_DA_REFERENCIA.json
+
+A referência aceita {"levels": [20 níveis de 1 a 6, na ordem original]} ou uma
+lista de questões com enunciation e level, exatamente na ordem da entrada.

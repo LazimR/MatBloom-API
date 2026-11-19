@@ -1,0 +1,252 @@
+{
+  "job": {
+    "experiment": "tamanho_lote",
+    "condition": "lote_1",
+    "batch_size": 1,
+    "run": 6,
+    "seed": null,
+    "positions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "id": "tamanho_lote/lote_1/rodada_06"
+  },
+  "metrics": {
+    "run": 6,
+    "started_at": "2026-10-15T21:08:30.365678+00:00",
+    "status": "failed",
+    "input_questions": 20,
+    "pending_questions": 20,
+    "classified_questions": 13,
+    "skipped_questions": 0,
+    "batches": 14,
+    "request_attempts": 14,
+    "retries": 0,
+    "failed_requests": 0,
+    "total_seconds": 377.74562030900415,
+    "api_seconds": 52.21992700100236,
+    "batch_wait_seconds": 325.22092273798626,
+    "retry_wait_seconds": 0,
+    "other_seconds": 0.30477057001553476,
+    "seconds_per_question": null,
+    "api_seconds_per_question": null,
+    "questions_per_minute": null,
+    "error": "Exception: DeepSeek retornou content vazio. finish_reason=length",
+    "output_file": "",
+    "failure_category": "empty_response"
+  },
+  "questions": null,
+  "requests": [
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 1,
+      "questions": 1,
+      "seconds": 2.0543783039975096
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 2,
+      "questions": 1,
+      "seconds": 2.687755480001215
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 3,
+      "questions": 1,
+      "seconds": 2.705107996996958
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 4,
+      "questions": 1,
+      "seconds": 2.435855061004986
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 5,
+      "questions": 1,
+      "seconds": 2.40033663000213
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 6,
+      "questions": 1,
+      "seconds": 2.5492404039978283
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 7,
+      "questions": 1,
+      "seconds": 2.7641755270014983
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 8,
+      "questions": 1,
+      "seconds": 3.583793374004017
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 9,
+      "questions": 1,
+      "seconds": 4.000490368998726
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 10,
+      "questions": 1,
+      "seconds": 2.3617738140019355
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 11,
+      "questions": 1,
+      "seconds": 2.32973201200366
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 12,
+      "questions": 1,
+      "seconds": 2.170875490999606
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 13,
+      "questions": 1,
+      "seconds": 2.8915602719935123
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 14,
+      "questions": 1,
+      "seconds": 17.28485226599878
+    }
+  ],
+  "waits": [
+    {
+      "batch": 2,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.002614195000206
+    },
+    {
+      "batch": 3,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.007597681993502
+    },
+    {
+      "batch": 4,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.02524715600157
+    },
+    {
+      "batch": 5,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.02551888600283
+    },
+    {
+      "batch": 6,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025435466995987
+    },
+    {
+      "batch": 7,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025440311997954
+    },
+    {
+      "batch": 8,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025427264998143
+    },
+    {
+      "batch": 9,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.008475850998366
+    },
+    {
+      "batch": 10,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.004588222000166
+    },
+    {
+      "batch": 11,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025488074999885
+    },
+    {
+      "batch": 12,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025436365998758
+    },
+    {
+      "batch": 13,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.0050845270016
+    },
+    {
+      "batch": 14,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.014568733997294
+    }
+  ],
+  "finished_at": "2026-10-15T21:14:48.111366+00:00"
+}

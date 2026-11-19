@@ -1,8 +1,3 @@
-from typing import Any
-
-from pydantic import BaseModel, Field
-
-from app.core.academic import TestKind, TestTargetType
 
 
 class BloomPerformanceItem(BaseModel):
@@ -65,31 +60,3 @@ class ClassroomAnalysis(BaseModel):
     errors_by_content: list[ContentErrorItem] = Field(default_factory=list)
     errors_by_bloom: list[BloomErrorItem] = Field(default_factory=list)
     student_averages: list[StudentAverageItem] = Field(default_factory=list)
-
-
-class ReinforcementQuestion(BaseModel):
-    enunciation: str
-    itens: list[str] = Field(default_factory=list)
-    correct_item: int
-    level: int
-    level_name: str
-    contents: list[str] = Field(default_factory=list)
-
-
-class ReinforcementGeneratedTest(BaseModel):
-    id: int
-    name: str
-    kind: TestKind
-    target_type: TestTargetType
-
-
-class StudentReinforcement(BaseModel):
-    student_id: int
-    student_name: str
-    source_question_count: int
-    generated_question_count: int = 0
-    generated_reinforcement: dict[str, Any]
-    generated_questions: list[ReinforcementQuestion] = Field(default_factory=list)
-    created_template: ReinforcementGeneratedTest | None = None
-    created_application: ReinforcementGeneratedTest | None = None
-    pdf_download_url: str | None = None

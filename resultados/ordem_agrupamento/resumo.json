@@ -1,0 +1,262 @@
+{
+  "updated_at": "2026-10-15T23:10:20.861743+00:00",
+  "planned_runs_per_condition": 10,
+  "accuracy_status": "Pendente: referência humana não fornecida; concordância com controle não é acurácia",
+  "control_source": "tamanho_lote/lote_2, mesma repetição; compartilhado sem nova chamada",
+  "control_stability": {
+    "successful_runs": 10,
+    "variable_questions": [],
+    "levels_by_question": {
+      "Q001": {
+        "1": 10
+      },
+      "Q002": {
+        "1": 10
+      },
+      "Q003": {
+        "1": 10
+      },
+      "Q004": {
+        "1": 10
+      },
+      "Q005": {
+        "1": 10
+      },
+      "Q006": {
+        "2": 10
+      },
+      "Q007": {
+        "2": 10
+      },
+      "Q008": {
+        "2": 10
+      },
+      "Q009": {
+        "3": 10
+      },
+      "Q010": {
+        "2": 10
+      },
+      "Q011": {
+        "3": 10
+      },
+      "Q012": {
+        "3": 10
+      },
+      "Q013": {
+        "3": 10
+      },
+      "Q014": {
+        "3": 10
+      },
+      "Q015": {
+        "3": 10
+      },
+      "Q016": {
+        "3": 10
+      },
+      "Q017": {
+        "3": 10
+      },
+      "Q018": {
+        "3": 10
+      },
+      "Q019": {
+        "3": 10
+      },
+      "Q020": {
+        "3": 10
+      }
+    }
+  },
+  "settings": {
+    "started_at": "2026-10-15T19:37:36.857092+00:00",
+    "input_file": "/home/lazimr/Documentos/github/MatBloom/MatBloom-API/scripts/questoes/quest_20.json",
+    "input_sha256": "c44a6915d7556c88c3eac9ffea81a33a427f9f64edbfa0102d26b472abe513bc",
+    "classifier_sha256": "77d0c1dfff7bdb92d93d55d7e8555db215414d363dddd56c42993e32c13c7495",
+    "bloom_definitions_sha256": "d1ade3289aec2b280578b45bb50f1dfa54691a1fe1a5f4b985ad3d321edcca83",
+    "input_questions": 20,
+    "requested_runs": 10,
+    "only_unclassified": false,
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.1,
+    "max_completion_tokens": 3000,
+    "batch_size": 2,
+    "batch_delay_seconds": 25.0,
+    "retry_delay_seconds": 25.0,
+    "max_attempts_per_batch": 5,
+    "deepseek_thinking_enabled": false,
+    "deepseek_reasoning_effort": "",
+    "sdk_automatic_retries": false,
+    "python_version": "3.12.3",
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "cpu_count": 12
+  },
+  "conditions": [
+    {
+      "condition": "original",
+      "completed_runs": 10,
+      "successful_runs": 10,
+      "failed_runs": 0,
+      "success_rate_percent": 100.0,
+      "incomplete_responses": 0,
+      "invalid_or_empty_responses": 0,
+      "request_attempts": 100,
+      "retries": 0,
+      "accuracy_percent": null,
+      "accuracy_evaluated": 0,
+      "changed_vs_control": 0,
+      "compared_vs_control": 200,
+      "changed_percent": 0.0,
+      "statistics": {
+        "total_seconds": {
+          "count": 10,
+          "mean": 262.4366564745986,
+          "median": 263.1353591179977,
+          "sample_stddev": 2.7895337534272215,
+          "min": 256.0795053499969,
+          "max": 265.3254103969957
+        },
+        "api_seconds": {
+          "count": 10,
+          "mean": 37.030221778501435,
+          "median": 37.722814655004186,
+          "sample_stddev": 2.780753151398288,
+          "min": 30.695472239989613,
+          "max": 39.933134862010775
+        },
+        "batch_wait_seconds": {
+          "count": 10,
+          "mean": 225.18653787580115,
+          "median": 225.18675739249738,
+          "sample_stddev": 0.01976950793308673,
+          "min": 225.154817619994,
+          "max": 225.21872316599183
+        },
+        "retry_wait_seconds": {
+          "count": 10,
+          "mean": 0,
+          "median": 0.0,
+          "sample_stddev": 0.0,
+          "min": 0,
+          "max": 0
+        },
+        "other_seconds": {
+          "count": 10,
+          "mean": 0.21989682029598043,
+          "median": 0.21848938898619963,
+          "sample_stddev": 0.0037265703470382426,
+          "min": 0.21773947900510393,
+          "max": 0.2298210030203336
+        },
+        "seconds_per_question": {
+          "count": 10,
+          "mean": 13.121832823729928,
+          "median": 13.156767955899888,
+          "sample_stddev": 0.13947668767136115,
+          "min": 12.803975267499846,
+          "max": 13.266270519849787
+        },
+        "api_seconds_per_question": {
+          "count": 10,
+          "mean": 1.8515110889250717,
+          "median": 1.886140732750209,
+          "sample_stddev": 0.1390376575699144,
+          "min": 1.5347736119994806,
+          "max": 1.9966567431005386
+        },
+        "questions_per_minute": {
+          "count": 10,
+          "mean": 4.573003179250207,
+          "median": 4.560391209099354,
+          "sample_stddev": 0.049259978665737045,
+          "min": 4.522748116000229,
+          "max": 4.686044665542051
+        }
+      }
+    },
+    {
+      "condition": "embaralhado",
+      "completed_runs": 10,
+      "successful_runs": 9,
+      "failed_runs": 1,
+      "success_rate_percent": 90.0,
+      "incomplete_responses": 0,
+      "invalid_or_empty_responses": 1,
+      "request_attempts": 96,
+      "retries": 0,
+      "accuracy_percent": null,
+      "accuracy_evaluated": 0,
+      "changed_vs_control": 3,
+      "compared_vs_control": 180,
+      "changed_percent": 1.6666666666666667,
+      "statistics": {
+        "total_seconds": {
+          "count": 9,
+          "mean": 266.4346828741133,
+          "median": 265.677178390004,
+          "sample_stddev": 5.8693369741906825,
+          "min": 259.83809930999996,
+          "max": 277.2910267979969
+        },
+        "api_seconds": {
+          "count": 9,
+          "mean": 41.011091220330854,
+          "median": 40.27619017300458,
+          "sample_stddev": 5.874063292115272,
+          "min": 34.41367300898855,
+          "max": 51.86857175399928
+        },
+        "batch_wait_seconds": {
+          "count": 9,
+          "mean": 225.2025598066652,
+          "median": 225.2062470039964,
+          "sample_stddev": 0.011214143873663658,
+          "min": 225.18288463900535,
+          "max": 225.2128570509958
+        },
+        "retry_wait_seconds": {
+          "count": 9,
+          "mean": 0,
+          "median": 0,
+          "sample_stddev": 0.0,
+          "min": 0,
+          "max": 0
+        },
+        "other_seconds": {
+          "count": 9,
+          "mean": 0.22103184711724883,
+          "median": 0.21816093799861846,
+          "sample_stddev": 0.009532777407250939,
+          "min": 0.2166544799983967,
+          "max": 0.24641436899401015
+        },
+        "seconds_per_question": {
+          "count": 9,
+          "mean": 13.321734143705665,
+          "median": 13.283858919500199,
+          "sample_stddev": 0.29346684870953416,
+          "min": 12.991904965499998,
+          "max": 13.864551339899844
+        },
+        "api_seconds_per_question": {
+          "count": 9,
+          "mean": 2.0505545610165425,
+          "median": 2.013809508650229,
+          "sample_stddev": 0.2937031646057636,
+          "min": 1.7206836504494276,
+          "max": 2.5934285876999636
+        },
+        "questions_per_minute": {
+          "count": 9,
+          "mean": 4.505844349582166,
+          "median": 4.516759803276914,
+          "sample_stddev": 0.09839106704662247,
+          "min": 4.327583239374656,
+          "max": 4.618260382856093
+        }
+      }
+    }
+  ]
+}

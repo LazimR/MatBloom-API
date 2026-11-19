@@ -1,0 +1,25 @@
+EXPERIMENTO: tamanho_lote
+Atualizado em UTC: 2026-10-15T23:10:20.841398+00:00
+Modelo: deepseek-v4-flash; temperatura: 0.1.
+Cada execução classifica as mesmas 20 questões. Os tempos são medidos em segundos.
+As estatísticas de tempo consideram somente execuções concluídas com sucesso.
+Pendente: referência humana não fornecida; concordância com controle não é acurácia
+
+Condição | Rodadas | Sucessos | API média (s) | API/questão (s) | Total médio (s) | Mudanças/controle
+lote_1 | 10 | 8 | 53,207 | 2,660 | 529,067 | 3/160
+lote_2 | 10 | 10 | 37,030 | 1,852 | 262,437 | 0/200
+lote_5 | 10 | 7 | 25,380 | 1,269 | 100,531 | 1/140
+lote_10 | 10 | 7 | 20,819 | 1,041 | 45,883 | 0/140
+
+INTERPRETAÇÃO E LIMITAÇÕES
+As condições são intercaladas em 10 blocos com ordem de execução aleatorizada e sementes registradas.
+O controle é a execução original de lote 2 no mesmo bloco; seu resultado é compartilhado pelos dois experimentos.
+Na condição original/lote_2, a diferença contra si mesma é zero por definição; não representa estabilidade entre rodadas.
+Questões com variação entre rodadas bem-sucedidas do controle: nenhuma observada até o momento.
+O campo changed compara a mesma identidade Q001 a Q020, após restaurar a ordem original.
+Nas permutações, todas as questões mudam de posição e de colega de lote. Isso mede o efeito conjunto de ordem e agrupamento.
+Uma diferença pode também refletir a variabilidade normal do modelo; não demonstra causalidade isolada de posição ou de colega.
+Concordância com o controle não equivale a acurácia pedagógica. Nenhum nível de referência foi inventado.
+O tempo de API inclui rede e SDK. O tempo total inclui as esperas necessárias entre lotes.
+Os níveis de uma mesma questão em várias rodadas não são amostras de questões distintas.
+Uma execução com falha não é reexecutada silenciosamente; permanece registrada. Retomar pula as rodadas já registradas.

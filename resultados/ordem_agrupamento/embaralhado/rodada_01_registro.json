@@ -1,0 +1,140 @@
+{
+  "job": {
+    "experiment": "ordem_agrupamento",
+    "condition": "embaralhado",
+    "batch_size": 2,
+    "run": 1,
+    "seed": 20261016,
+    "positions": [
+      12,
+      4,
+      15,
+      0,
+      19,
+      7,
+      10,
+      9,
+      6,
+      17,
+      8,
+      13,
+      18,
+      16,
+      5,
+      2,
+      1,
+      11,
+      14,
+      3
+    ],
+    "id": "ordem_agrupamento/embaralhado/rodada_01"
+  },
+  "metrics": {
+    "run": 1,
+    "started_at": "2026-10-15T19:46:47.990149+00:00",
+    "status": "failed",
+    "input_questions": 20,
+    "pending_questions": 20,
+    "classified_questions": 10,
+    "skipped_questions": 0,
+    "batches": 6,
+    "request_attempts": 6,
+    "retries": 0,
+    "failed_requests": 0,
+    "total_seconds": 158.04870913799823,
+    "api_seconds": 32.886560047001694,
+    "batch_wait_seconds": 125.03206611200585,
+    "retry_wait_seconds": 0,
+    "other_seconds": 0.13008297899068566,
+    "seconds_per_question": null,
+    "api_seconds_per_question": null,
+    "questions_per_minute": null,
+    "error": "Exception: DeepSeek retornou content vazio. finish_reason=length",
+    "output_file": "",
+    "failure_category": "empty_response"
+  },
+  "questions": null,
+  "requests": [
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 1,
+      "questions": 2,
+      "seconds": 2.300896159998956
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 2,
+      "questions": 2,
+      "seconds": 2.8461196520001977
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 3,
+      "questions": 2,
+      "seconds": 2.643562056000519
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 4,
+      "questions": 2,
+      "seconds": 2.9709526329970686
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 5,
+      "questions": 2,
+      "seconds": 2.805654155999946
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 6,
+      "questions": 2,
+      "seconds": 19.319375390005007
+    }
+  ],
+  "waits": [
+    {
+      "batch": 2,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.00726181400387
+    },
+    {
+      "batch": 3,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.00060871700407
+    },
+    {
+      "batch": 4,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.012423284999386
+    },
+    {
+      "batch": 5,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.004600900996593
+    },
+    {
+      "batch": 6,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.007171395001933
+    }
+  ],
+  "finished_at": "2026-10-15T19:49:26.038900+00:00"
+}

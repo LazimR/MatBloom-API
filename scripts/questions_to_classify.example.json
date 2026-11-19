@@ -1,0 +1,30 @@
+{
+  "questions": [
+    {
+      "enunciation": "Uma bactéria triplica sua quantidade a cada hora. Se inicialmente há 3 bactérias, quantas haverá após 4 horas?",
+      "itens": ["162", "189", "216", "243"],
+      "correct_item": 3,
+      "level": 0,
+      "contents": ["Exponenciação", "Crescimento exponencial", "Situação-problema"]
+    },
+    {
+      "enunciation": "Qual é o resultado de 7 × 8?",
+      "itens": ["48", "54", "56", "64"],
+      "correct_item": 2,
+      "level": 0,
+      "contents": ["Multiplicação", "Operações básicas"]
+    },
+    {
+      "enunciation": "Explique por que a soma de dois números pares sempre resulta em um número par.",
+      "itens": [
+        "Porque 2 + 2 = 4",
+        "Porque pares compartilham o divisor 2",
+        "Porque números pares terminam em 0, 2, 4, 6 ou 8",
+        "Porque a multiplicação de pares é par"
+      ],
+      "correct_item": 1,
+      "level": 0,
+      "contents": ["Paridade", "Números pares", "Argumentação"]
+    }
+  ]
+}

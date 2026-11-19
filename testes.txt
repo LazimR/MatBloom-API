@@ -1,0 +1,17 @@
+1. Tempo de classificação de Bloom
+  - Usar conjuntos de 1, 5, 10, 20 e 30 questões.
+    - Repetir cada tamanho 10 vezes.
+    - Manter as mesmas configurações e o mesmo tamanho de lote por chamada.
+    - Registrar tempo total, tempo médio por questão, média, mediana e desvio padrão entre execuções.
+    - Separar o tempo das chamadas das esperas programadas e registrar falhas.
+   - Separar as esperas programadas entre chamadas.
+2. Tempo e precisão da correção de provas
+   - Corrigir folhas com diferentes quantidades de questões.
+   - Registrar segundos por folha, acertos na leitura das alternativas e identificação correta do aluno.
+3. Robustez da correção por imagem
+   - Fotografar as mesmas folhas em condições diferentes: boa iluminação, sombra, inclinação e desfoque.
+   - Medir alternativas lidas corretamente, falhas na identificação do aluno e tempo de processamento.
+4. Consistência da classificação de Bloom
+   - Repetir a classificação das mesmas questões.
+   - Medir quantas mantêm o mesmo nível e quais apresentam maior variação.
+   - Comparar a consistência entre os modelos.

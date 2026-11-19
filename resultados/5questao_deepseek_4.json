@@ -1,0 +1,84 @@
+{
+  "questions": [
+    {
+      "enunciation": "Qual é o nome dado ao número que indica quantas vezes a base é multiplicada por ela mesma em uma potência?",
+      "itens": [
+        "Base",
+        "Expoente",
+        "Produto",
+        "Fator"
+      ],
+      "correct_item": 1,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Elementos da potência",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Qual é a propriedade que afirma que, ao multiplicar potências de mesma base, os expoentes são somados?",
+      "itens": [
+        "Potência de potência",
+        "Produto de potências de mesma base",
+        "Divisão de potências",
+        "Expoente zero"
+      ],
+      "correct_item": 1,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Propriedades da potenciação",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Em uma potência a^n, qual elemento representa o número que será multiplicado repetidas vezes?",
+      "itens": [
+        "Expoente",
+        "Resultado",
+        "Base",
+        "Índice"
+      ],
+      "correct_item": 2,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Elementos da potência",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Qual é a forma geral utilizada para representar um número em notação científica?",
+      "itens": [
+        "a × 10^n, com 1 ≤ a < 10",
+        "10^a × n",
+        "a^n × 10",
+        "n × a^10"
+      ],
+      "correct_item": 0,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Notação científica",
+        "Conceitos básicos"
+      ]
+    },
+    {
+      "enunciation": "Como é chamada a propriedade que afirma que todo número não nulo elevado a zero é igual a 1?",
+      "itens": [
+        "Expoente negativo",
+        "Potência de potência",
+        "Propriedade do expoente zero",
+        "Produto de potências"
+      ],
+      "correct_item": 2,
+      "level": 1,
+      "contents": [
+        "Exponenciação",
+        "Expoente zero",
+        "Conceitos básicos"
+      ]
+    }
+  ]
+}

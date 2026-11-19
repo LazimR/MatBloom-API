@@ -1,0 +1,98 @@
+{
+  "job": {
+    "experiment": "tamanho_lote",
+    "condition": "lote_5",
+    "batch_size": 5,
+    "run": 4,
+    "seed": null,
+    "positions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "id": "tamanho_lote/lote_5/rodada_04"
+  },
+  "metrics": {
+    "run": 4,
+    "started_at": "2026-10-15T20:34:16.914367+00:00",
+    "status": "failed",
+    "input_questions": 20,
+    "pending_questions": 20,
+    "classified_questions": 10,
+    "skipped_questions": 0,
+    "batches": 3,
+    "request_attempts": 3,
+    "retries": 0,
+    "failed_requests": 0,
+    "total_seconds": 82.59301659199991,
+    "api_seconds": 32.47621799700573,
+    "batch_wait_seconds": 50.0506543050069,
+    "retry_wait_seconds": 0,
+    "other_seconds": 0.06614428998727817,
+    "seconds_per_question": null,
+    "api_seconds_per_question": null,
+    "questions_per_minute": null,
+    "error": "Exception: DeepSeek retornou content vazio. finish_reason=length",
+    "output_file": "",
+    "failure_category": "empty_response"
+  },
+  "questions": null,
+  "requests": [
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 1,
+      "questions": 5,
+      "seconds": 8.344942427000205
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 2,
+      "questions": 5,
+      "seconds": 5.264577991001715
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 3,
+      "questions": 5,
+      "seconds": 18.866697579003812
+    }
+  ],
+  "waits": [
+    {
+      "batch": 2,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025231443003577
+    },
+    {
+      "batch": 3,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025422862003325
+    }
+  ],
+  "finished_at": "2026-10-15T20:35:39.507438+00:00"
+}

@@ -1,0 +1,140 @@
+{
+  "job": {
+    "experiment": "tamanho_lote",
+    "condition": "lote_1",
+    "batch_size": 1,
+    "run": 3,
+    "seed": null,
+    "positions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "id": "tamanho_lote/lote_1/rodada_03"
+  },
+  "metrics": {
+    "run": 3,
+    "started_at": "2026-10-15T20:21:35.825538+00:00",
+    "status": "failed",
+    "input_questions": 20,
+    "pending_questions": 20,
+    "classified_questions": 5,
+    "skipped_questions": 0,
+    "batches": 6,
+    "request_attempts": 6,
+    "retries": 0,
+    "failed_requests": 1,
+    "total_seconds": 140.096670222003,
+    "api_seconds": 14.877683030994376,
+    "batch_wait_seconds": 125.08693191200291,
+    "retry_wait_seconds": 0,
+    "other_seconds": 0.13205527900572633,
+    "seconds_per_question": null,
+    "api_seconds_per_question": null,
+    "questions_per_minute": null,
+    "error": "APITimeoutError: Request timed out.",
+    "output_file": "",
+    "failure_category": "timeout"
+  },
+  "questions": null,
+  "requests": [
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 1,
+      "questions": 1,
+      "seconds": 1.7013525619986467
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 2,
+      "questions": 1,
+      "seconds": 2.422958096001821
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 3,
+      "questions": 1,
+      "seconds": 1.8731076659969403
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 4,
+      "questions": 1,
+      "seconds": 1.8207897980028065
+    },
+    {
+      "attempt": 1,
+      "status_code": 200,
+      "error": "",
+      "batch": 5,
+      "questions": 1,
+      "seconds": 2.0526201049942756
+    },
+    {
+      "attempt": 1,
+      "status_code": null,
+      "error": "APITimeoutError",
+      "batch": 6,
+      "questions": 1,
+      "seconds": 5.006854803999886
+    }
+  ],
+  "waits": [
+    {
+      "batch": 2,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.02543229600269
+    },
+    {
+      "batch": 3,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.002728899999056
+    },
+    {
+      "batch": 4,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.025433920003707
+    },
+    {
+      "batch": 5,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.02539517400146
+    },
+    {
+      "batch": 6,
+      "reason": "between_batches",
+      "requested_seconds": 25.0,
+      "seconds": 25.007941621995997
+    }
+  ],
+  "finished_at": "2026-10-15T20:23:55.922303+00:00"
+}

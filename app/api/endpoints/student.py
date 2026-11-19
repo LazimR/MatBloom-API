@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.schemas.analysis import StudentAnalysis
@@ -52,25 +52,6 @@ def get_student_pedagogical_analysis(
 ):
     ensure_student_scope(student_id, db, current_user)
     return get_student_analysis(db, student_id)
-
-
-@router.post(
-    "/{student_id}/analysis/reinforcement",
-    dependencies=[Depends(require_user)],
-)
-def generate_student_analysis_reinforcement(
-    student_id: int,
-    db: Session = Depends(get_session),
-    current_user: dict = Depends(get_current_user_payload),
-):
-    ensure_student_scope(student_id, db, current_user)
-    raise HTTPException(
-        status_code=410,
-        detail=(
-            "A geração automática de novas questões e provas foi descontinuada. "
-            "Use as rotas de análise do aluno para identificar erros por conteúdo e nível de Bloom."
-        ),
-    )
 
 
 @router.put("/", response_model=Student, dependencies=[Depends(require_director_or_admin)])
