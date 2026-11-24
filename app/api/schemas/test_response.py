@@ -15,6 +15,11 @@ class TestResponseCreate(TestResponseBase):
     pass
 
 
+class AnswerSheetConfirmation(TestResponseCreate):
+    counts_toward_average: bool | None = None
+    expected_counts_toward_average: bool | None = None
+
+
 class TestResponseUpdate(BaseModel):
     id: int
     score: float | None = None

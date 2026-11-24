@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.models.connection import get_session
 from app.db.repositories.question_repository import QuestionRepository
 
-from app.api.schemas.question import Question as QuestionSchema, QuestionCreate, QuestionDelete
+from app.api.schemas.question import Question as QuestionSchema, QuestionCreate, QuestionDelete, QuestionLevelUpdate
 from app.api.security.auth import require_user
+from app.api.services.question_classifier import classify_questions_batch
 
 router = APIRouter()
 
@@ -39,7 +40,7 @@ def get_question(question_id: int, db: Session = Depends(get_session)):
     return repo.get_question(question_id)
 
 @router.post("/", response_model=QuestionSchema, dependencies=[Depends(require_user)])
-def create_question(question: QuestionCreate, db: Session = Depends(get_session)):
+async def create_question(question: QuestionCreate, db: Session = Depends(get_session)):
     """
     Cria uma nova questão no banco de dados.
 
@@ -50,8 +51,21 @@ def create_question(question: QuestionCreate, db: Session = Depends(get_session)
     return:
         - Question - A questão criada.
     """
+    if "level" not in question.model_fields_set:
+        if not any(content.strip() for content in question.contents):
+            raise HTTPException(status_code=422, detail="Informe ao menos um conteúdo para classificar a questão automaticamente.")
+        try:
+            classified = await classify_questions_batch([question.model_dump()])
+            question.level = classified[0]["level"]
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail="Não foi possível classificar a questão. Verifique a configuração do serviço de classificação e tente novamente.") from exc
     repo = QuestionRepository(db)
     return repo.create_question(question)
+
+@router.patch("/{question_id}/level", response_model=QuestionSchema, dependencies=[Depends(require_user)])
+def update_question_level(question_id: int, update: QuestionLevelUpdate, db: Session = Depends(get_session)):
+    return QuestionRepository(db).update_level(question_id, update.level)
+
 
 @router.delete("/", response_model=bool, dependencies=[Depends(require_user)])
 def delete_question(question: QuestionDelete, db: Session = Depends(get_session)):

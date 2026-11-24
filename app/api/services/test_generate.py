@@ -1,4 +1,5 @@
 from io import BytesIO
+import re
 from zipfile import ZipFile
 from app.api.services.pdf_generate import pdf_test_generate, generate_answer_sheet
 from app.core.academic import TestKind, TestTargetType
@@ -12,6 +13,8 @@ def test_generate(test_id: int, student_names: list[str], student_ids: list[str]
     test = rep.get_test(test_id)
     if test.kind != TestKind.APPLICATION.value:
         raise ValidationError("A geração de PDF só pode ser feita a partir de uma aplicação de prova.")
+    if not getattr(test, "question_order_confirmed", True):
+        raise ValidationError("Confirme a ordem original das questões desta aplicação antes de gerar o PDF.")
 
     if student_ids and len(student_ids) != len(student_names):
         raise ValidationError("A quantidade de IDs de alunos deve corresponder à quantidade de nomes.")
@@ -29,7 +32,8 @@ def test_generate(test_id: int, student_names: list[str], student_ids: list[str]
         student_id = student_ids[i] if student_ids else None
 
         pdf_buffer = pdf_test_generate(test.name, questions, student_name, student_id)
-        pdf_buffers.append((f"{student_name}_teste.pdf", pdf_buffer))
+        filename_id = re.sub(r"[^0-9A-Za-z_-]", "_", str(student_id)) if student_id else str(i + 1)
+        pdf_buffers.append((f"aluno_{filename_id}_teste.pdf", pdf_buffer))
 
         answer_sheet_buffer = generate_answer_sheet(
             student_name,
@@ -37,7 +41,7 @@ def test_generate(test_id: int, student_names: list[str], student_ids: list[str]
             len(questions),
             len(questions[0]["itens"]),
         )
-        pdf_buffers.append((f"{student_name}_gabarito.pdf", answer_sheet_buffer))
+        pdf_buffers.append((f"aluno_{filename_id}_gabarito.pdf", answer_sheet_buffer))
 
 
     # Cria um arquivo ZIP em memória

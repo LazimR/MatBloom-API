@@ -1,7 +1,8 @@
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.schemas.question import Question as QuestionSchema, QuestionCreate, QuestionDelete
-from app.core.exceptions import NotFoundError, OperationError, ValidationError
+from app.core.exceptions import ConflictError, NotFoundError, OperationError, ValidationError
 from app.db.models.models import Question as QuestionModel, QuestionDependency, Content, QuestionContent
 
 class QuestionRepository:
@@ -24,8 +25,30 @@ class QuestionRepository:
             raise NotFoundError(f"Questão com ID {question_id} não existe.")
         
         return self._build_question_schema(db_question)
+
+    def update_level(self, question_id: int, level: int) -> QuestionSchema:
+        question = self.db_session.query(QuestionModel).filter(QuestionModel.id == question_id).first()
+        if not question:
+            raise NotFoundError(f"Questão com ID {question_id} não existe.")
+        question.level = level
+        self.db_session.commit()
+        self.db_session.refresh(question)
+        return self._build_question_schema(question)
     
     def create_question(self, question_data: QuestionCreate) -> QuestionSchema:
+        # Serializa inserções com o mesmo enunciado até o primeiro commit.
+        self.db_session.execute(
+            text("SELECT pg_advisory_xact_lock(hashtextextended(:enunciation, 0))"),
+            {"enunciation": question_data.enunciation},
+        )
+        existing = self.db_session.query(QuestionModel).filter(
+            QuestionModel.enunciation == question_data.enunciation,
+            QuestionModel.itens == question_data.itens,
+            QuestionModel.correct_item == question_data.correct_item,
+        ).first()
+        if existing:
+            raise ConflictError(f"Esta questão já está cadastrada (ID {existing.id}).")
+
         db_question = QuestionModel(
             enunciation=question_data.enunciation,
             itens=question_data.itens,

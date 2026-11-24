@@ -86,7 +86,7 @@ def test_create_user_requires_admin_after_bootstrap(client, monkeypatch):
     )
 
     assert response.status_code == 403
-    assert response.json()["detail"] == "Apenas administradores podem criar usuários."
+    assert response.json()["detail"] == "Apenas administradores podem criar este usuário; diretores podem criar professores."
 
 
 def test_login_sets_http_only_cookie_and_returns_session_user(client, monkeypatch):
@@ -890,7 +890,7 @@ def test_teacher_cannot_update_grade_outside_scope(client, monkeypatch):
 
 
 def test_admin_can_assign_classroom_to_teacher(client, monkeypatch):
-    app.dependency_overrides[auth.require_admin] = lambda: {"role": "admin", "user_id": 1}
+    app.dependency_overrides[auth.require_director_or_admin] = lambda: {"role": "admin", "user_id": 1}
 
     class FakeUserRepository:
         def __init__(self, _db):
@@ -924,7 +924,7 @@ def test_admin_can_assign_classroom_to_teacher(client, monkeypatch):
 
 
 def test_admin_can_remove_classroom_from_teacher(client, monkeypatch):
-    app.dependency_overrides[auth.require_admin] = lambda: {"role": "admin", "user_id": 1}
+    app.dependency_overrides[auth.require_director_or_admin] = lambda: {"role": "admin", "user_id": 1}
 
     class FakeUserRepository:
         def __init__(self, _db):
@@ -993,3 +993,59 @@ def test_teacher_cannot_list_other_teacher_classrooms(client, monkeypatch):
 
     assert response.status_code == 403
     assert response.json()["detail"] == "Você só pode visualizar as próprias turmas."
+
+
+def test_classroom_pdf_uses_active_students_without_headers(client, monkeypatch):
+    from io import BytesIO
+
+    app.dependency_overrides[auth.require_user] = lambda: {"role": "professor", "user_id": 9}
+    app.dependency_overrides[auth.get_current_user_payload] = lambda: {"role": "professor", "user_id": 9}
+    monkeypatch.setattr(test_endpoint, "ensure_test_scope", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(test_endpoint, "TestRepository", lambda _db: SimpleNamespace(
+        get_test=lambda _id: SimpleNamespace(target_type="turma", classroom_id=2)
+    ))
+
+    def list_students(ids):
+        assert ids == {2}
+        return [SimpleNamespace(id=7, name="Maria, Silva", active=True), SimpleNamespace(id=8, name="Aluno inativo", active=False)]
+
+    monkeypatch.setattr(test_endpoint, "StudentRepository", lambda _db: SimpleNamespace(list_students=list_students))
+    def generate(test_id, names, ids, _db):
+        assert (test_id, names, ids) == (22, ["Maria, Silva"], ["7"])
+        return BytesIO(b"zip-content")
+    monkeypatch.setattr(test_endpoint, "test_generate", generate)
+
+    response = client.get("/test/applications/22/generate")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/zip"
+
+
+@pytest.mark.parametrize(
+    ("actor", "requested_role", "expected_status"),
+    [
+        ("diretor", "professor", 200),
+        ("diretor", "diretor", 403),
+        ("diretor", "admin", 403),
+        ("professor", "professor", 403),
+        ("admin", "professor", 200),
+        ("admin", "diretor", 200),
+        ("admin", "admin", 200),
+    ],
+)
+def test_user_creation_permissions_by_role(client, monkeypatch, actor, requested_role, expected_status):
+    app.dependency_overrides[auth.get_optional_current_user_payload] = lambda: {"role": actor, "user_id": 1}
+
+    class FakeUserRepository:
+        def __init__(self, _db):
+            pass
+        def has_any_user(self):
+            return True
+        def create_user(self, user):
+            return {"id": 42, "username": user.username, "email": user.email, "role": user.role, "classes": []}
+
+    monkeypatch.setattr(user_endpoint, "UserRepository", FakeUserRepository)
+    response = client.post("/user/", json={"username": "novo", "email": "novo@example.com", "password": "teste", "role": requested_role})
+    assert response.status_code == expected_status
+    if expected_status == 200:
+        assert response.json()["role"] == requested_role
+        assert "password" not in response.json()

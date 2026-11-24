@@ -1,4 +1,4 @@
-
+from pydantic import BaseModel, Field
 
 class BloomPerformanceItem(BaseModel):
     level: int
@@ -40,6 +40,7 @@ class StudentAnalysis(BaseModel):
     classroom_id: int
     overall_average: float | None
     total_attempts: int
+    unordered_attempts: int = 0
     average_by_test: list[TestAverageItem] = Field(default_factory=list)
     bloom_performance: list[BloomPerformanceItem] = Field(default_factory=list)
     errors_by_content: list[ContentErrorItem] = Field(default_factory=list)
@@ -54,6 +55,7 @@ class ClassroomAnalysis(BaseModel):
     shift: str
     student_count: int
     active_students: int
+    unordered_attempts: int = 0
     overall_average: float | None
     average_by_test: list[TestAverageItem] = Field(default_factory=list)
     bloom_performance: list[BloomPerformanceItem] = Field(default_factory=list)

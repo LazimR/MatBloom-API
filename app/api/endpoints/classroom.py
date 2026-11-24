@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.schemas.analysis import ClassroomAnalysis
 from app.api.schemas.classroom import Classroom, ClassroomCreate, ClassroomUpdate
+from app.api.services.reinforcement_suggestions import suggest_questions
 from app.api.services.analysis_service import get_classroom_analysis
 from app.api.security.auth import (
     ensure_classroom_scope,
@@ -52,6 +53,18 @@ def get_classroom_pedagogical_analysis(
 ):
     ensure_classroom_scope(classroom_id, db, current_user)
     return get_classroom_analysis(db, classroom_id)
+
+
+@router.get("/{classroom_id}/reinforcement-suggestions", dependencies=[Depends(require_user)])
+def get_classroom_reinforcement_suggestions(
+    classroom_id: int,
+    quantity: int = Query(default=10, ge=1, le=100),
+    db: Session = Depends(get_session),
+    current_user: dict = Depends(get_current_user_payload),
+):
+    ensure_classroom_scope(classroom_id, db, current_user)
+    analysis = get_classroom_analysis(db, classroom_id)
+    return suggest_questions(db, analysis, quantity)
 
 
 @router.put("/", response_model=Classroom, dependencies=[Depends(require_director_or_admin)])

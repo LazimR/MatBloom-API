@@ -15,6 +15,8 @@ def answer_sheet_corrector(image: BytesIO, test_id: int, db: Session):
     test = repo.get_test(test_id)
     if test.kind != TestKind.APPLICATION.value:
         raise ValidationError("A correção automática só pode ser feita para uma aplicação de prova.")
+    if not getattr(test, "question_order_confirmed", True):
+        raise ValidationError("Confirme a ordem original das questões desta aplicação antes de corrigir o gabarito.")
 
     gabarito = [question.correct_item for question in test.questions]
     if any(item is None for item in gabarito):

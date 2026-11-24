@@ -23,6 +23,10 @@ def _round_score(value: float | None) -> float | None:
     return round(value, 2)
 
 
+def _counts_toward_average(response: TestResponse) -> bool:
+    return response.test is not None and getattr(response.test, "counts_toward_average", True)
+
+
 def _empty_bloom_stats() -> dict[int, dict[str, int]]:
     return {
         level: {
@@ -96,6 +100,8 @@ def _accumulate_response_metrics(
     bloom_stats: dict[int, dict[str, int]],
     content_errors: dict[str, int],
 ):
+    if response.test and not getattr(response.test, "question_order_confirmed", True):
+        return
     wrong_positions = set(response.wrong_questions or [])
     test_questions = response.test.questions if response.test else []
 
@@ -156,7 +162,7 @@ def _get_classroom_with_analysis_context(db: Session, classroom_id: int) -> Clas
 def get_student_analysis(db: Session, student_id: int) -> StudentAnalysis:
     student = _get_student_with_analysis_context(db, student_id)
 
-    scores = [response.score for response in student.test_responses if response.score is not None]
+    scores = [response.score for response in student.test_responses if response.score is not None and _counts_toward_average(response)]
     average_by_test: dict[int, dict[str, object]] = defaultdict(lambda: {"name": "", "scores": []})
     bloom_stats = _empty_bloom_stats()
     content_errors: dict[str, int] = defaultdict(int)
@@ -175,6 +181,7 @@ def get_student_analysis(db: Session, student_id: int) -> StudentAnalysis:
         classroom_id=student.classroom_id,
         overall_average=_round_score(mean(scores)) if scores else None,
         total_attempts=len(student.test_responses),
+        unordered_attempts=sum(1 for response in student.test_responses if response.test and not getattr(response.test, "question_order_confirmed", True)),
         average_by_test=_build_average_by_test(average_by_test),
         bloom_performance=_build_bloom_performance(bloom_stats),
         errors_by_content=_build_errors_by_content(content_errors),
@@ -192,7 +199,7 @@ def get_classroom_analysis(db: Session, classroom_id: int) -> ClassroomAnalysis:
     student_averages: list[StudentAverageItem] = []
 
     for student in classroom.students:
-        student_scores = [response.score for response in student.test_responses if response.score is not None]
+        student_scores = [response.score for response in student.test_responses if response.score is not None and _counts_toward_average(response)]
         all_scores.extend(student_scores)
 
         for response in student.test_responses:
@@ -220,6 +227,7 @@ def get_classroom_analysis(db: Session, classroom_id: int) -> ClassroomAnalysis:
         shift=classroom.shift,
         student_count=len(classroom.students),
         active_students=sum(1 for student in classroom.students if student.active),
+        unordered_attempts=sum(1 for student in classroom.students for response in student.test_responses if response.test and not getattr(response.test, "question_order_confirmed", True)),
         overall_average=_round_score(mean(all_scores)) if all_scores else None,
         average_by_test=_build_average_by_test(average_by_test),
         bloom_performance=_build_bloom_performance(bloom_stats),

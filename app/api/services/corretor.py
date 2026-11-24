@@ -14,6 +14,47 @@ gabarito = ["a", "b", "c", "d", "e", "a", "b", "c", "d", "e"]
 NUMERO_QUESTOES = 10
 NUMERO_ALTERNATIVAS = 5
 
+
+def validar_formato_gabarito(imagem, numero_questoes, numero_alternativas):
+    """Reject a clearly different grid; do not guess when the photo is inconclusive."""
+    altura, largura = imagem.shape
+    contornos, _ = cv2.findContours(imagem, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    centros = []
+    for contorno in contornos:
+        x, y, w, h = cv2.boundingRect(contorno)
+        if 0.015 <= w / largura <= 0.3 and 0.012 <= h / altura <= 0.3:
+            centros.append(((x + w / 2) / largura, (y + h / 2) / altura))
+
+    def detectar_quantidade(axis, maximum):
+        candidatos = []
+        for quantidade in range(2, maximum + 1):
+            grupos = [0] * quantidade
+            for centro in centros:
+                posicao = centro[axis] * quantidade - 0.5
+                indice = round(posicao)
+                if 0 <= indice < quantidade and abs(posicao - indice) <= 0.16:
+                    grupos[indice] += 1
+            # Require repeated evidence for every column/row and a clean fit.
+            minimo = 2 if len(centros) >= quantidade * 2 else 1
+            total = sum(grupos)
+            if all(grupo >= minimo for grupo in grupos) and total >= len(centros) * 0.8:
+                candidatos.append((total, quantidade))
+        return max(candidatos)[1] if len(candidatos) == 1 else None
+
+    alternativas_detectadas = detectar_quantidade(0, 5)
+    questoes_detectadas = detectar_quantidade(1, 10)
+    if alternativas_detectadas is not None and alternativas_detectadas != numero_alternativas:
+        raise ValidationError(
+            f"O gabarito parece ter {alternativas_detectadas} alternativas, mas a aplicação possui "
+            f"{numero_alternativas}. Envie o gabarito gerado para esta aplicação."
+        )
+    if questoes_detectadas is not None and questoes_detectadas != numero_questoes:
+        raise ValidationError(
+            f"O gabarito parece ter {questoes_detectadas} questões, mas a aplicação possui "
+            f"{numero_questoes}. Envie o gabarito gerado para esta aplicação."
+        )
+
+
 def corrigir(arquivo: BytesIO, gabarito:list = None, numero_questoes=NUMERO_QUESTOES, numero_alternativas=NUMERO_ALTERNATIVAS):
     arquivo.seek(0)
 
@@ -96,6 +137,8 @@ def corrigir(arquivo: BytesIO, gabarito:list = None, numero_questoes=NUMERO_QUES
             matriz_de_transformacao,
             (layout.total_width, layout.total_height),
         )
+        if len(layout.blocks) == 1:
+            validar_formato_gabarito(img_corrigida, numero_questoes, numero_alternativas)
         img_bordas_cortadas = utils.cortar_imagem(img_corrigida, 0.99)
         crop_offset_x = (img_corrigida.shape[1] - img_bordas_cortadas.shape[1]) // 2
         crop_offset_y = (img_corrigida.shape[0] - img_bordas_cortadas.shape[0]) // 2
@@ -182,7 +225,7 @@ def corrigir(arquivo: BytesIO, gabarito:list = None, numero_questoes=NUMERO_QUES
         letter_to_number = lambda letter: ord(letter.upper()) - 65
 
         for i, resposta in enumerate(respostas):
-            respostas[i] = letter_to_number(resposta)
+            respostas[i] = -1 if resposta == "N/A" else letter_to_number(resposta)
 
         return [respostas, pontuacao, id_aluno, questoes_erradas]
     except ValidationError:

@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Instala o Poetry
-RUN pip install poetry
+RUN pip install poetry poetry-plugin-export
 
 # Configura o Poetry para não criar ambientes virtuais
 RUN poetry config virtualenvs.create false

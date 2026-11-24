@@ -6,7 +6,7 @@ from app.core.roles import UserRole
 from app.api.schemas.classroom import Classroom as ClassroomSchema
 from app.db.models.models import Classroom as ClassroomModel
 from app.db.models.models import User as UserModel
-from app.api.schemas.user import UserCreate, User as UserSchema
+from app.api.schemas.user import TeacherSummary, UserCreate, User as UserSchema
 from app.api.schemas.user import UserLogin, UserUpdate, UserDelete
 
 class UserRepository:
@@ -45,6 +45,10 @@ class UserRepository:
     def list_users(self) -> list[UserSchema]:
         users = self.db_session.query(UserModel).all()
         return [UserSchema.model_validate(user) for user in users]
+
+    def list_teachers(self) -> list[TeacherSummary]:
+        teachers = self.db_session.query(UserModel).filter(UserModel.role == UserRole.TEACHER.value).order_by(UserModel.username).all()
+        return [TeacherSummary.model_validate(teacher) for teacher in teachers]
     
     def add_classroom_to_user(self, user_id: int, classroom_id: int):
         user = self.db_session.query(UserModel).filter(UserModel.id == user_id).first()

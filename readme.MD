@@ -75,6 +75,7 @@ app/
 - `admin` gerencia usuários e vínculos professor-turma
 - `diretor` gerencia turmas, alunos e notas
 - `professor` acessa apenas alunos, notas e análises das turmas vinculadas a ele
+- `diretor` pode cadastrar e listar professores e gerenciar seus vínculos com turmas; apenas `admin` pode cadastrar diretores e administradores
 - `professor` pode consultar modelos de prova da biblioteca
 - `professor` pode aplicar modelos somente nas próprias turmas
 - aplicações de prova seguem escopo por turma
@@ -94,6 +95,8 @@ app/
 - análise por turma
 - média geral
 - média por prova
+- a aplicação pode ser marcada para não contar na média geral; as notas continuam visíveis por prova e os erros continuam nas análises
+- a escolha vale para todas as respostas da aplicação, inclusive as já registradas, e é aplicada ao confirmar uma correção
 - desempenho por nível de Bloom
 - erros por conteúdo
 - erros por nível cognitivo
@@ -108,6 +111,7 @@ app/
 - `GET /user/{username}`
 - `PUT /user/`
 - `DELETE /user/`
+- `GET /user/directory/teachers`
 - `GET /user/{user_id}/classrooms`
 - `POST /user/{user_id}/classrooms/{classroom_id}`
 - `DELETE /user/{user_id}/classrooms/{classroom_id}`
@@ -155,6 +159,8 @@ app/
 - `PUT /test-response/`
 - `DELETE /test-response/{test_response_id}`
 - `POST /answer-sheet/answer_sheet`
+- `POST /answer-sheet/preview` — lê uma ou mais imagens ou um ZIP sem registrar notas
+- `POST /answer-sheet/confirm` — registra uma resposta conferida e pode definir se a aplicação conta na média
 
 ## Configuração
 

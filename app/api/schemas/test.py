@@ -49,6 +49,10 @@ class TestTemplateVersionCreate(BaseModel):
     questions: List[int] | None = None
     visibility: TestVisibility | None = None
 
+
+class TestQuestionOrderConfirmation(BaseModel):
+    questions: List[int] = Field(min_length=1)
+
 class Test(TestBase):
     """
         Esta classe representa o modelo de Teste para retorno.
@@ -59,6 +63,8 @@ class Test(TestBase):
             - questions: List[Question] - Lista de questões associadas ao teste.
     """
     id: int
+    question_order_confirmed: bool = False
+    counts_toward_average: bool = True
     kind: TestKind = TestKind.TEMPLATE
     visibility: TestVisibility | None = None
     classroom_id: int | None = None

@@ -8,13 +8,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.api.schemas.classroom import Classroom as ClassroomSchema
 from app.db.models.connection import get_session
 from app.db.repositories.user_repository import UserRepository
-from app.api.schemas.user import AuthSession, User as UserSchema, UserCreate, UserUpdate, UserDelete, UserLogin
+from app.api.schemas.user import AuthSession, TeacherSummary, User as UserSchema, UserCreate, UserUpdate, UserDelete, UserLogin
 from app.api.security.auth import (
     auth_cookie_name,
     create_access_token,
     get_current_user_payload,
     get_optional_current_user_payload,
     require_admin,
+    require_director_or_admin,
     require_user,
 )
 from app.core.roles import UserRole
@@ -85,14 +86,20 @@ def create_user(
 ):
     repo = UserRepository(db)
     if repo.has_any_user():
-        if current_user is None or current_user.get("role") != UserRole.ADMIN.value:
-            raise HTTPException(status_code=403, detail="Apenas administradores podem criar usuários.")
+        role = current_user.get("role") if current_user else None
+        if role != UserRole.ADMIN.value and not (role == UserRole.DIRECTOR.value and user.role == UserRole.TEACHER):
+            raise HTTPException(status_code=403, detail="Apenas administradores podem criar este usuário; diretores podem criar professores.")
     return repo.create_user(user)
 
 @router.get("/", response_model=list[UserSchema], dependencies=[Depends(require_admin)])
 def list_users(db: Session = Depends(get_session)):
     repo = UserRepository(db)
     return repo.list_users()
+
+
+@router.get("/directory/teachers", response_model=list[TeacherSummary], dependencies=[Depends(require_director_or_admin)])
+def list_teachers(db: Session = Depends(get_session)):
+    return UserRepository(db).list_teachers()
 
 @router.get("/{username}", response_model=UserSchema, dependencies=[Depends(require_user)])
 def get_user(
@@ -147,13 +154,13 @@ def list_user_classrooms(
     return repo.list_user_classrooms(user_id)
 
 
-@router.post("/{user_id}/classrooms/{classroom_id}", response_model=UserSchema, dependencies=[Depends(require_admin)])
+@router.post("/{user_id}/classrooms/{classroom_id}", response_model=UserSchema, dependencies=[Depends(require_director_or_admin)])
 def add_classroom_to_user(user_id: int, classroom_id: int, db: Session = Depends(get_session)):
     repo = UserRepository(db)
     return repo.add_classroom_to_user(user_id, classroom_id)
 
 
-@router.delete("/{user_id}/classrooms/{classroom_id}", response_model=UserSchema, dependencies=[Depends(require_admin)])
+@router.delete("/{user_id}/classrooms/{classroom_id}", response_model=UserSchema, dependencies=[Depends(require_director_or_admin)])
 def remove_classroom_from_user(user_id: int, classroom_id: int, db: Session = Depends(get_session)):
     repo = UserRepository(db)
     return repo.remove_classroom_from_user(user_id, classroom_id)

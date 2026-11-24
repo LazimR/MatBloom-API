@@ -82,6 +82,7 @@ class TestRepository:
             template_group_id=None,
             version_number=1,
             applied_by_user_id=None,
+            question_order_confirmed=True,
         )
         self.db_session.add(db_test)
         self.db_session.flush()
@@ -245,6 +246,7 @@ class TestRepository:
             source_test_id=None,
             template_group_id=template_group_id,
             version_number=next_version,
+            question_order_confirmed=True,
             kind=TestKind.TEMPLATE.value,
             visibility=(version_data.visibility or template.visibility),
             target_type=template.target_type,
@@ -303,6 +305,7 @@ class TestRepository:
             source_test_id=template.id,
             template_group_id=template.template_group_id or template.id,
             version_number=template.version_number,
+            question_order_confirmed=True,
             kind=TestKind.APPLICATION.value,
             visibility=template.visibility,
             target_type=application.target_type.value,
@@ -367,7 +370,7 @@ class TestRepository:
         return db_test
 
     def _attach_questions(self, test_id: int, question_ids: list[int]):
-        for question_id in question_ids:
+        for position, question_id in enumerate(question_ids, start=1):
             question = (
                 self.db_session.query(QuestionModel)
                 .filter(QuestionModel.id == question_id)
@@ -375,11 +378,31 @@ class TestRepository:
             )
             if not question:
                 raise NotFoundError(f"Question with ID {question_id} does not exist.")
-            self.db_session.add(TestQuestion(test_id=test_id, question_id=question_id))
+            self.db_session.add(TestQuestion(test_id=test_id, question_id=question_id, position=position))
+
+    def confirm_question_order(self, test_id: int, question_ids: list[int]) -> TestSchema:
+        test = self._get_test_model(test_id)
+        if test.kind != TestKind.APPLICATION.value:
+            raise ValidationError("A confirmação de ordem é destinada a aplicações de prova.")
+        if test.question_order_confirmed:
+            raise ValidationError("Esta aplicação já possui uma ordem confirmada.")
+        existing = {question.id for question in test.questions}
+        if len(question_ids) != len(existing) or set(question_ids) != existing:
+            raise ValidationError("Informe cada questão da aplicação exatamente uma vez.")
+        links = self.db_session.query(TestQuestion).filter(TestQuestion.test_id == test_id).all()
+        positions = {question_id: index for index, question_id in enumerate(question_ids, start=1)}
+        for link in links:
+            link.position = positions[link.question_id]
+        test.question_order_confirmed = True
+        self.db_session.commit()
+        self.db_session.expire(test, ["questions"])
+        return self.get_test(test_id)
 
     def _build_test_schema(self, db_test: TestModel) -> TestSchema:
         return TestSchema(
             id=db_test.id,
+            question_order_confirmed=getattr(db_test, "question_order_confirmed", False),
+            counts_toward_average=getattr(db_test, "counts_toward_average", True),
             name=db_test.name,
             theme=db_test.theme,
             application_date=db_test.application_date,

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.schemas.analysis import StudentAnalysis
 from app.api.schemas.student import Student, StudentCreate, StudentUpdate
+from app.api.services.reinforcement_suggestions import suggest_questions
 from app.api.services.analysis_service import get_student_analysis
 from app.api.security.auth import (
     ensure_student_scope,
@@ -52,6 +53,18 @@ def get_student_pedagogical_analysis(
 ):
     ensure_student_scope(student_id, db, current_user)
     return get_student_analysis(db, student_id)
+
+
+@router.get("/{student_id}/reinforcement-suggestions", dependencies=[Depends(require_user)])
+def get_student_reinforcement_suggestions(
+    student_id: int,
+    quantity: int = Query(default=10, ge=1, le=100),
+    db: Session = Depends(get_session),
+    current_user: dict = Depends(get_current_user_payload),
+):
+    ensure_student_scope(student_id, db, current_user)
+    analysis = get_student_analysis(db, student_id)
+    return suggest_questions(db, analysis, quantity)
 
 
 @router.put("/", response_model=Student, dependencies=[Depends(require_director_or_admin)])

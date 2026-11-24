@@ -240,3 +240,19 @@ def test_get_library_usage_metrics_raises_when_no_templates(monkeypatch):
 
     with pytest.raises(NotFoundError, match="No test templates found"):
         repo.get_library_usage_metrics(current_user={"role": "admin", "user_id": 1})
+
+
+def test_attach_questions_persists_requested_order():
+    session = FakeSession([_question(9), _question(1), _question(4)])
+    ExamRepository(session)._attach_questions(10, [9, 1, 4])
+    assert [(link.question_id, link.position) for link in session.added] == [(9, 1), (1, 2), (4, 3)]
+
+
+def test_legacy_order_confirmation_rejects_missing_or_repeated_questions(monkeypatch):
+    session = FakeSession([])
+    repo = ExamRepository(session)
+    exam = SimpleNamespace(kind="application", question_order_confirmed=False, questions=[_question(1), _question(2)])
+    monkeypatch.setattr(repo, "_get_test_model", lambda _id: exam)
+    with pytest.raises(ValidationError, match="exatamente uma vez"):
+        repo.confirm_question_order(10, [1, 1])
+    assert exam.question_order_confirmed is False

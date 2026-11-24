@@ -7,6 +7,7 @@ from app.api.schemas.test import (
     TestApplicationCreate,
     TestCreate,
     TestLibraryUsageMetrics,
+    TestQuestionOrderConfirmation,
     TestTemplateVersionCreate,
 )
 from app.api.security.auth import (
@@ -66,6 +67,12 @@ def create_test_template_version(
     ensure_test_scope(test_id, db, current_user)
     repo = TestRepository(db)
     return repo.create_template_version(test_id, version_data, current_user.get("user_id"))
+
+
+@router.put("/applications/{test_id}/question-order", response_model=Test, dependencies=[Depends(require_user)])
+def confirm_application_question_order(test_id: int, order: TestQuestionOrderConfirmation, db: Session = Depends(get_session), current_user: dict = Depends(get_current_user_payload)):
+    ensure_test_scope(test_id, db, current_user)
+    return TestRepository(db).confirm_question_order(test_id, order.questions)
 
 
 @router.get("/", response_model=list[Test], dependencies=[Depends(require_user)])
@@ -150,13 +157,22 @@ def generate_test_application(
             student_names = [student.name]
             student_ids = [str(student.id)]
         else:
-            if not student_name or not student_id:
+            if not student_name and not student_id:
+                if test.classroom_id is None:
+                    raise HTTPException(status_code=400, detail="A aplicação não possui turma associada.")
+                students = [student for student in StudentRepository(db).list_students({test.classroom_id}) if student.active]
+                if not students:
+                    raise HTTPException(status_code=400, detail="A turma não possui alunos ativos para gerar as provas.")
+                student_names = [student.name for student in students]
+                student_ids = [str(student.id) for student in students]
+            elif not student_name or not student_id:
                 raise HTTPException(
                     status_code=400,
                     detail="Aplicações por turma exigem student-name e student-id nos headers.",
                 )
-            student_names = student_name.split(",")
-            student_ids = student_id.split(",")
+            else:
+                student_names = student_name.split(",")
+                student_ids = student_id.split(",")
 
         zip_buffer = test_generate(test_id, student_names, student_ids, db)
 

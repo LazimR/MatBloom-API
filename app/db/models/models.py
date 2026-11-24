@@ -44,6 +44,8 @@ class Test(Base):
     source_test_id: Mapped[int | None] = mapped_column(ForeignKey("test.id"), nullable=True)
     template_group_id: Mapped[int | None] = mapped_column(ForeignKey("test.id"), nullable=True)
     version_number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    question_order_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    counts_toward_average: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
     kind: Mapped[str] = mapped_column(String, nullable=False, default=TestKind.TEMPLATE.value)
     visibility: Mapped[str] = mapped_column(String, nullable=False, default=TestVisibility.PRIVATE.value)
     target_type: Mapped[str] = mapped_column(String, nullable=False, default=TestTargetType.INDIVIDUAL.value)
@@ -52,6 +54,7 @@ class Test(Base):
     questions: Mapped[list["Question"]] = relationship(
         "Question",
         secondary="test_question",  # Nome da tabela auxiliar
+        order_by=lambda: (TestQuestion.position.asc().nullslast(), Question.id),
         backref="tests"  # Permite acessar os testes associados a uma questão
     )
 
@@ -67,6 +70,7 @@ class TestQuestion(Base):
 
     test_id: Mapped[int] = mapped_column(Integer, ForeignKey("test.id"), primary_key=True)
     question_id: Mapped[int] = mapped_column(Integer, ForeignKey("question.id"), primary_key=True)
+    position: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 class Content(Base):
     __tablename__ = "content"

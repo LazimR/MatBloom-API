@@ -63,13 +63,13 @@ INSERT INTO content (id, name) VALUES
 INSERT INTO question (id, enunciation, itens, correct_item, level) VALUES
 (1, 'Qual expressão representa a leitura correta de 2³?', ARRAY['2 multiplicado por ele mesmo 3 vezes', '2 somado 3 vezes', '3 multiplicado por ele mesmo 2 vezes', '2 dividido por 3', '3 dividido por 2'], 0, 1),
 (2, 'Qual é o valor de 7¹?', ARRAY['7', '1', '0', '14', '49'], 0, 1),
-(3, 'Ao simplificar 5² × 5³, qual propriedade está sendo aplicada corretamente?', ARRAY['Conserva a base e soma os expoentes', 'Multiplica a base e conserva o expoente', 'Subtrai a base e soma os expoentes', 'Eleva a base ao produto dos expoentes', 'Divide os expoentes pela base'], 1, 2),
-(4, 'Qual expressão é equivalente a (3²)²?', ARRAY['3² + 3²', '3⁴', '9²', '3² ÷ 2', '2³'], 1, 2),
+(3, 'Ao simplificar 5² × 5³, qual propriedade está sendo aplicada corretamente?', ARRAY['Multiplica a base e conserva o expoente', 'Conserva a base e soma os expoentes', 'Subtrai a base e soma os expoentes', 'Eleva a base ao produto dos expoentes', 'Divide os expoentes pela base'], 1, 2),
+(4, 'Qual expressão é equivalente a (3²)²?', ARRAY['3² + 3²', '3⁴', '9 × 2', '3² ÷ 2', '2³'], 1, 2),
 (5, 'Um tabuleiro recebe o dobro de grãos a cada casa. Qual modelo melhor representa a quantidade na casa n?', ARRAY['2 + n', '2n', 'n²', 'n + 2²', '2ⁿ'], 4, 3),
-(6, 'Se um software executa 2³ operações por ciclo e repete esse ciclo 2² vezes, qual é o total de operações?', ARRAY['2⁵', '2⁶', '2³ + 2²', '3²', '8'], 4, 3),
-(7, 'Ao comparar 2⁶ e 4³, qual conclusão está correta?', ARRAY['2⁶ é maior', '4³ é maior', 'São equivalentes porque representam 64', 'Não é possível comparar', 'Ambos valem 32'], 4, 4),
-(8, 'Em uma cultura de bactérias, a quantidade passa de 3 para 12 e depois para 48. Qual análise melhor descreve o padrão?', ARRAY['Aumenta de 9 em 9', 'Duplica a cada etapa', 'Triplica a cada etapa', 'Quadruplica a cada etapa', 'Multiplica por 4 a cada etapa'], 4, 4),
-(9, 'Qual justificativa avalia corretamente a afirmação “a⁰ = 1, para a diferente de zero”?', ARRAY['Porque todo número vezes zero é um', 'Porque zero é o elemento neutro da multiplicação', 'Porque decorre da regularidade da divisão de potências de mesma base', 'Porque o expoente zero anula a base', 'Porque a potência sempre repete a base uma vez'], 4, 5),
+(6, 'Se um software executa 2³ operações por ciclo e repete esse ciclo 2² vezes, qual é o total de operações?', ARRAY['8', '2⁶', '2³ + 2²', '3²', '2⁵'], 4, 3),
+(7, 'Ao comparar 2⁶ e 4³, qual conclusão está correta?', ARRAY['2⁶ é maior', '4³ é maior', 'Ambos valem 32', 'Não é possível comparar', 'São equivalentes porque representam 64'], 4, 4),
+(8, 'Em uma cultura de bactérias, a quantidade passa de 3 para 12 e depois para 48. Qual análise melhor descreve o padrão?', ARRAY['Aumenta de 9 em 9', 'Duplica a cada etapa', 'Triplica a cada etapa', 'Aumenta de 4 em 4', 'Multiplica por 4 a cada etapa'], 4, 4),
+(9, 'Qual justificativa avalia corretamente a afirmação “a⁰ = 1, para a diferente de zero”?', ARRAY['Porque todo número vezes zero é um', 'Porque zero é o elemento neutro da multiplicação', 'Porque a potência sempre repete a base uma vez', 'Porque o expoente zero anula a base', 'Porque decorre da regularidade da divisão de potências de mesma base'], 4, 5),
 (10, 'Qual proposta de solução cria um procedimento eficiente para calcular 3⁸ sem multiplicar 3 oito vezes manualmente?', ARRAY['Somar 3 oito vezes', 'Calcular 3 × 8', 'Usar 3² e depois dividir por 2', 'Transformar em 8³', 'Decompor 3⁸ em (3⁴)² e reutilizar resultados intermediários'], 4, 6);
 
 INSERT INTO question_content (question_id, content_id) VALUES
@@ -115,16 +115,43 @@ INSERT INTO test_question (test_id, question_id) VALUES
 (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10),
 (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (4, 10);
 
-INSERT INTO test_response (id, test_id, student_id, score, responses, wrong_questions, attempt_date) VALUES
-(1, 2, 1, 8, ARRAY[0, 0, 1, 1, 4, 4, 2, 4, 4, 4], ARRAY[7, 9], DATE '2026-04-01'),
-(2, 2, 2, 7, ARRAY[0, 0, 0, 1, 4, 4, 4, 4, 1, 4], ARRAY[3, 7, 9], DATE '2026-04-01'),
-(3, 2, 3, 6, ARRAY[0, 1, 1, 1, 2, 4, 4, 4, 4, 3], ARRAY[2, 5, 7, 10], DATE '2026-04-01'),
-(4, 2, 4, 9, ARRAY[0, 0, 1, 1, 4, 4, 4, 4, 2, 4], ARRAY[9], DATE '2026-04-01'),
-(5, 2, 5, 5, ARRAY[1, 0, 3, 1, 4, 0, 4, 1, 4, 4], ARRAY[1, 3, 6, 8, 9], DATE '2026-04-01'),
-(6, 2, 6, 4, ARRAY[0, 1, 3, 0, 2, 4, 1, 4, 0, 2], ARRAY[2, 3, 4, 5, 7, 9], DATE '2026-04-01'),
-(7, 2, 7, 10, ARRAY[0, 0, 1, 1, 4, 4, 4, 4, 4, 4], ARRAY[]::INTEGER[], DATE '2026-04-01'),
-(8, 2, 8, 6, ARRAY[0, 0, 1, 3, 4, 2, 4, 4, 4, 1], ARRAY[4, 6, 7, 10], DATE '2026-04-01'),
-(9, 2, 9, 7, ARRAY[0, 0, 1, 1, 1, 4, 4, 2, 4, 4], ARRAY[5, 8, 9], DATE '2026-04-01'),
-(10, 2, 10, 3, ARRAY[2, 1, 0, 0, 4, 0, 1, 4, 0, 1], ARRAY[1, 2, 3, 4, 6, 7, 9], DATE '2026-04-01'),
-(11, 2, 11, 8, ARRAY[0, 0, 1, 1, 4, 4, 4, 2, 4, 4], ARRAY[8, 9], DATE '2026-04-01'),
-(12, 2, 12, 5, ARRAY[0, 1, 1, 1, 3, 4, 2, 4, 0, 4], ARRAY[2, 5, 7, 9, 10], DATE '2026-04-01');
+-- Neste conjunto de exemplo a ordem é conhecida e corresponde ao ID da questão.
+UPDATE test_question SET position = question_id WHERE test_id IN (1, 2, 3, 4);
+UPDATE test SET question_order_confirmed = true WHERE id IN (1, 2, 3, 4);
+
+-- Deriva a nota e as posições erradas do mesmo gabarito e da ordem da prova.
+WITH response_seed (id, test_id, student_id, responses, attempt_date) AS (
+    VALUES
+    (1, 2, 1, ARRAY[0, 0, 1, 1, 4, 4, 2, 4, 4, 4], DATE '2026-04-01'),
+    (2, 2, 2, ARRAY[0, 0, 0, 1, 4, 4, 4, 4, 1, 4], DATE '2026-04-01'),
+    (3, 2, 3, ARRAY[0, 1, 1, 1, 2, 4, 4, 4, 4, 3], DATE '2026-04-01'),
+    (4, 2, 4, ARRAY[0, 0, 1, 1, 4, 4, 4, 4, 2, 4], DATE '2026-04-01'),
+    (5, 2, 5, ARRAY[1, 0, 3, 1, 4, 0, 4, 1, 4, 4], DATE '2026-04-01'),
+    (6, 2, 6, ARRAY[0, 1, 3, 0, 2, 4, 1, 4, 0, 2], DATE '2026-04-01'),
+    (7, 2, 7, ARRAY[0, 0, 1, 1, 4, 4, 4, 4, 4, 4], DATE '2026-04-01'),
+    (8, 2, 8, ARRAY[0, 0, 1, 3, 4, 2, 4, 4, 4, 1], DATE '2026-04-01'),
+    (9, 2, 9, ARRAY[0, 0, 1, 1, 1, 4, 4, 2, 4, 4], DATE '2026-04-01'),
+    (10, 2, 10, ARRAY[2, 1, 0, 0, 4, 0, 1, 4, 0, 1], DATE '2026-04-01'),
+    (11, 2, 11, ARRAY[0, 0, 1, 1, 4, 4, 4, 2, 4, 4], DATE '2026-04-01'),
+    (12, 2, 12, ARRAY[0, 1, 1, 1, 3, 4, 2, 4, 0, 4], DATE '2026-04-01')
+)
+INSERT INTO test_response (id, test_id, student_id, score, responses, wrong_questions, attempt_date)
+SELECT seed.id, seed.test_id, seed.student_id,
+       10.0 * COUNT(*) FILTER (WHERE seed.responses[tq.position] = q.correct_item) / COUNT(*),
+       seed.responses,
+       COALESCE(ARRAY_AGG(tq.position ORDER BY tq.position)
+           FILTER (WHERE seed.responses[tq.position] IS DISTINCT FROM q.correct_item), ARRAY[]::INTEGER[]),
+       seed.attempt_date
+FROM response_seed AS seed
+JOIN test_question AS tq ON tq.test_id = seed.test_id
+JOIN question AS q ON q.id = tq.question_id
+GROUP BY seed.id, seed.test_id, seed.student_id, seed.responses, seed.attempt_date;
+
+-- IDs explícitos do seed não avançam automaticamente as sequences.
+SELECT setval(pg_get_serial_sequence('"user"', 'id'), (SELECT MAX(id) FROM "user"));
+SELECT setval(pg_get_serial_sequence('classroom', 'id'), (SELECT MAX(id) FROM classroom));
+SELECT setval(pg_get_serial_sequence('student', 'id'), (SELECT MAX(id) FROM student));
+SELECT setval(pg_get_serial_sequence('content', 'id'), (SELECT MAX(id) FROM content));
+SELECT setval(pg_get_serial_sequence('question', 'id'), (SELECT MAX(id) FROM question));
+SELECT setval(pg_get_serial_sequence('test', 'id'), (SELECT MAX(id) FROM test));
+SELECT setval(pg_get_serial_sequence('test_response', 'id'), (SELECT MAX(id) FROM test_response));

@@ -111,3 +111,15 @@ def test_test_generate_requires_target_student_for_individual_application(monkey
 
     with pytest.raises(ValidationError, match="aluno-alvo"):
         test_generate_service.test_generate(5, ["Maria"], ["7"], db=None)
+
+
+def test_class_zip_keeps_files_for_students_with_same_name(monkeypatch):
+    from zipfile import ZipFile
+
+    exam = SimpleNamespace(kind="application", name="Prova", questions=[SimpleNamespace(dict=lambda: {"enunciation": "Questão", "itens": ["A", "B"]})])
+    monkeypatch.setattr(test_generate_service, "TestRepository", lambda _db: SimpleNamespace(get_test=lambda _id: exam))
+    monkeypatch.setattr(test_generate_service, "pdf_test_generate", lambda *_args: BytesIO(b"prova"))
+    monkeypatch.setattr(test_generate_service, "generate_answer_sheet", lambda *_args: BytesIO(b"gabarito"))
+    result = test_generate_service.test_generate(1, ["Ana", "Ana"], ["7", "8"], db=None)
+    with ZipFile(result) as archive:
+        assert set(archive.namelist()) == {"aluno_7_teste.pdf", "aluno_7_gabarito.pdf", "aluno_8_teste.pdf", "aluno_8_gabarito.pdf"}

@@ -45,6 +45,8 @@ class QuestionCreate(QuestionBase):
             - contents: List[str] - Lista de conteúdos relacionados.
             - dependencies: Optional[List[str]] - Lista de IDs de questões que dependem desta.
     """
+    level: int = UNCLASSIFIED_LEVEL
+
     @model_validator(mode="after")
     def validate_question(self):
         if len(self.itens) < 2:
@@ -63,6 +65,10 @@ class QuestionDelete(BaseModel):
             - id: int - ID da questão a ser deletada.
     """
     id: int
+
+
+class QuestionLevelUpdate(BaseModel):
+    level: int = Field(ge=1, le=6)
 
 class Question(QuestionBase):
     """
