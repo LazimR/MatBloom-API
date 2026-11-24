@@ -1,234 +1,103 @@
 # MatBloom API
 
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
-![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+API do MatBloom para gestão de questões e avaliações de Matemática, classificação por níveis da Taxonomia de Bloom, correção de gabaritos e análise de desempenho.
 
-API do MatBloom para gerenciamento pedagógico, geração de provas, correção automática de gabaritos e análise educacional baseada na Taxonomia de Bloom.
+## Tecnologias
 
-## Sobre
+- Python 3.11 ou superior, FastAPI, Pydantic e SQLAlchemy
+- PostgreSQL e Alembic para banco de dados e migrações
+- DeepSeek ou Groq para classificação de questões por modelo de linguagem
+- OpenCV e Tesseract para leitura de gabaritos por imagem
+- ReportLab e WeasyPrint para documentos PDF
+- JWT em cookie HTTP-only para sessão e bcrypt para senhas
 
-O backend do MatBloom foi estruturado para atender o fluxo principal do sistema:
+## Funcionalidades
 
-- autenticação com papéis `admin`, `diretor` e `professor`
-- gerenciamento de usuários, turmas, alunos, conteúdos, questões e provas
-- biblioteca de modelos de prova por tema
-- aplicação de modelos de prova em turmas
-- vínculo professor-turma com controle de escopo
-- registro de respostas/notas por tentativa
-- correção automática de gabaritos por imagem
-- análises pedagógicas por aluno e por turma
-- geração automática de reforço com base em erros e níveis da Taxonomia de Bloom
+- Cadastro de usuários, turmas, alunos, conteúdos e questões. O administrador pode criar diretores e professores; o diretor pode criar professores e gerenciar turmas, alunos e vínculos de professores.
+- Classificação automática de questões sem nível informado, usando um prompt estruturado. O professor pode corrigir o nível posteriormente. O provedor deve estar configurado para o cadastro automático funcionar.
+- Modelos reutilizáveis de prova e aplicações vinculadas a uma turma ou a um aluno. As questões de uma aplicação precisam ter a mesma quantidade de alternativas, entre 2 e 5, para gerar o gabarito.
+- Seleção de questões existentes por conteúdo ou histórico de erros, com sugestões para reforço. Essa seleção não cria questões novas.
+- Geração de prova e gabarito em PDF. A correção aceita imagens e oferece uma prévia antes de confirmar as respostas e a nota.
+- Análise por aluno e por turma, com desempenho por nível de Bloom e erros por conteúdo. Uma aplicação pode ser marcada para não contribuir para a média geral; suas respostas continuam no histórico e nas análises.
 
-## Stack
-
-### Core
-- FastAPI
-- Python 3.11+
-- SQLAlchemy ORM
-- Pydantic v2
-- PostgreSQL
-
-### Segurança
-- JWT com `python-jose`
-- Hash de senha com `passlib` + `bcrypt`
-
-### Documentos e OCR
-- ReportLab
-- WeasyPrint
-- PyPDF2
-- OpenCV
-- PyTesseract
-
-### IA
-- Integração com Groq para geração de reforço pedagógico
-
-## Organização
-
-```text
-app/
-  api/
-    endpoints/
-    schemas/
-    security/
-    services/
-  core/
-  db/
-    models/
-    repositories/
-  test/
-```
-
-## Funcionalidades atuais
-
-### Gestão acadêmica
-- CRUD de turmas
-- CRUD de alunos
-- CRUD de conteúdos
-- CRUD de questões
-- criação de modelos de prova
-- aplicação de modelos de prova em turmas
-- listagem de biblioteca de provas e aplicações
-- CRUD de respostas/notas (`test_response`)
-
-### Autorização
-- `admin` gerencia usuários e vínculos professor-turma
-- `diretor` gerencia turmas, alunos e notas
-- `professor` acessa apenas alunos, notas e análises das turmas vinculadas a ele
-- `diretor` pode cadastrar e listar professores e gerenciar seus vínculos com turmas; apenas `admin` pode cadastrar diretores e administradores
-- `professor` pode consultar modelos de prova da biblioteca
-- `professor` pode aplicar modelos somente nas próprias turmas
-- aplicações de prova seguem escopo por turma
-
-### Provas e correção
-- provas agora possuem dois papéis no backend:
-  - `template`: modelo reutilizável da biblioteca
-  - `application`: aplicação concreta de um modelo em turma
-- modelos podem ser reutilizados por tema
-- aplicações registram vínculo com turma, aplicador e modelo de origem
-- geração de PDF de prova e gabarito
-- correção automática por imagem
-- armazenamento das respostas, nota, questões erradas e data da tentativa
-
-### Análise pedagógica
-- análise por aluno
-- análise por turma
-- média geral
-- média por prova
-- a aplicação pode ser marcada para não contar na média geral; as notas continuam visíveis por prova e os erros continuam nas análises
-- a escolha vale para todas as respostas da aplicação, inclusive as já registradas, e é aplicada ao confirmar uma correção
-- desempenho por nível de Bloom
-- erros por conteúdo
-- erros por nível cognitivo
-- reforço automático a partir dos erros do aluno
-
-## Rotas principais
-
-### Usuários
-- `POST /user/login`
-- `POST /user/`
-- `GET /user/`
-- `GET /user/{username}`
-- `PUT /user/`
-- `DELETE /user/`
-- `GET /user/directory/teachers`
-- `GET /user/{user_id}/classrooms`
-- `POST /user/{user_id}/classrooms/{classroom_id}`
-- `DELETE /user/{user_id}/classrooms/{classroom_id}`
-
-### Turmas
-- `POST /classroom/`
-- `GET /classroom/`
-- `GET /classroom/{classroom_id}`
-- `GET /classroom/{classroom_id}/analysis`
-- `PUT /classroom/`
-- `DELETE /classroom/{classroom_id}`
-
-### Alunos
-- `POST /student/`
-- `GET /student/`
-- `GET /student/{student_id}`
-- `GET /student/{student_id}/analysis`
-- `POST /student/{student_id}/analysis/reinforcement`
-- `PUT /student/`
-- `DELETE /student/{student_id}`
-
-### Questões, conteúdos e provas
-- `POST /content/`
-- `GET /content/`
-- `GET /content/{content_id}`
-- `PUT /content/{content_id}`
-- `DELETE /content/{content_id}`
-- `GET /question/all_questions`
-- `GET /question/{question_id}`
-- `POST /question/`
-- `DELETE /question/`
-- `POST /test/`
-- `GET /test/`
-- `GET /test/templates`
-- `GET /test/applications`
-- `POST /test/{test_id}/apply`
-- `GET /test/{test_id}`
-- `GET /test/test_generate`
-- `DELETE /test/{test_id}`
-
-### Notas e correção
-- `POST /test-response/`
-- `GET /test-response/`
-- `GET /test-response/{test_response_id}`
-- `PUT /test-response/`
-- `DELETE /test-response/{test_response_id}`
-- `POST /answer-sheet/answer_sheet`
-- `POST /answer-sheet/preview` — lê uma ou mais imagens ou um ZIP sem registrar notas
-- `POST /answer-sheet/confirm` — registra uma resposta conferida e pode definir se a aplicação conta na média
+Os professores têm acesso às turmas vinculadas. Confira as classificações e a leitura das imagens antes de confirmar os resultados.
 
 ## Configuração
-
-Crie um `.env` a partir de `.env.example`.
-
-### Variáveis esperadas
-
-```env
-DB_HOST=matbloom-db
-DB_PORT=5432
-DB_NAME=matbloom
-DB_USER=postgres
-DB_PASSWORD=postgres
-DATABASE_URL=postgresql://postgres:postgres@matbloom-db:5432/matbloom
-
-SECRET_KEY=sua_chave_secreta
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-
-GROQ_API_KEY=
-```
-
-O backend usa `DATABASE_URL` quando ela estiver definida. Caso contrário, a URL é montada a partir de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e `DB_PASSWORD`.
-
-## Execução local
-
-### 1. Instale as dependências
-
-```bash
-poetry install
-```
-
-### 2. Configure o ambiente
 
 ```bash
 cp .env.example .env
 ```
 
-### 3. Suba a API
+Edite `.env` conforme o ambiente:
 
-```bash
-poetry run uvicorn app.main:app --reload
-```
+- `DATABASE_URL` tem prioridade sobre `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e `DB_PASSWORD`. O endereço de exemplo `matbloom-db` funciona na rede do Docker; para uma API local, use o endereço e a porta do PostgreSQL acessível pelo seu computador, por exemplo `localhost`.
+- Configure `SECRET_KEY`, `JWT_ALGORITHM` e `ACCESS_TOKEN_EXPIRE_MINUTES` para autenticação. `AUTH_COOKIE_SECURE`, `AUTH_COOKIE_SAMESITE` e `FRONTEND_ORIGINS` controlam cookie e CORS.
+- Para classificação automática, defina `CLASSIFICATION_PROVIDER=deepseek` e `DEEPSEEK_API_KEY`, ou `CLASSIFICATION_PROVIDER=groq` e `GROQ_API_KEY`. Modelo, temperatura, tamanho de lote, intervalos e tentativas são configuráveis no `.env.example`.
+- `AUTO_MIGRATE` e `SEED_MOCK_DATA` são usados pelo script de inicialização do contêiner; executar o Uvicorn diretamente não aplica migrações nem carrega o seed.
 
-### 4. Acesse a documentação
+Nunca inclua chaves ou senhas reais em arquivos versionados. O modelo e os demais parâmetros do arquivo de exemplo podem ser diferentes daqueles usados em uma bateria experimental específica; consulte os registros da bateria ao reproduzi-la.
 
-- Swagger: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+## Executar localmente
+
+Pré-requisitos: Python 3.11+, Poetry, PostgreSQL, Tesseract OCR e bibliotecas nativas exigidas pelo OpenCV e WeasyPrint. O [Dockerfile](Dockerfile) mostra as dependências de sistema instaladas na imagem.
+
+1. Prepare o arquivo `.env`, configure o banco acessível localmente e instale as dependências:
+
+   ```bash
+   cp .env.example .env
+   poetry install
+   ```
+
+2. Com o PostgreSQL disponível, aplique as migrações e inicie a API:
+
+   ```bash
+   poetry run alembic upgrade head
+   poetry run uvicorn app.main:app --reload
+   ```
+
+3. Acesse <http://localhost:8000/docs> para a documentação interativa ou <http://localhost:8000/redoc> para o ReDoc. `/health` verifica a conexão com o banco.
+
+Para subir API, banco e interface em contêineres, siga o [README do projeto principal](../readme.MD).
+
+### Usuário inicial e dados de exemplo
+
+Em um banco sem usuários, `POST /user/` permite criar o primeiro usuário; escolha o papel `admin` para administrar a instalação. Após a criação inicial, a rota aplica as regras de permissão. No Docker, `SEED_MOCK_DATA=if-empty` carrega os dados de exemplo se a tabela de usuários estiver vazia; `never` desativa a carga e `always` força sua execução.
+
+**O arquivo `app/db/scripts/mock.sql` contém `TRUNCATE` e apaga os dados das tabelas listadas antes de inserir os exemplos.** Não execute o seed em um banco que precise ser preservado. No Compose do projeto principal, defina `SEED_MOCK_DATA` no ambiente do Compose ou no `.env` da raiz.
+
+## Rotas principais
+
+A lista completa e os formatos das requisições estão em `/docs`.
+
+- Sessão: `POST /user/login`, `GET /user/session`, `POST /user/logout`.
+- Usuários e vínculos: `POST /user/`, `GET /user/directory/teachers`, `POST` e `DELETE /user/{user_id}/classrooms/{classroom_id}`.
+- Turmas e alunos: `/classroom/` e `/student/`; análises em `GET /classroom/{classroom_id}/analysis` e `GET /student/{student_id}/analysis`.
+- Questões e conteúdos: `GET /question/all_questions`, `POST /question/`, `PATCH /question/{question_id}/level` e `/content/`.
+- Provas: `POST /test/`, `GET /test/templates`, `POST /test/{test_id}/apply`, `GET /test/applications` e `GET /test/applications/{test_id}/generate`.
+- Reforço: `GET /classroom/{classroom_id}/reinforcement-suggestions` e `GET /student/{student_id}/reinforcement-suggestions`.
+- Correção: `POST /answer-sheet/preview` lê imagens ou ZIP sem gravar notas; `POST /answer-sheet/confirm` valida as respostas e recalcula a nota antes de registrar.
 
 ## Testes
 
-A suíte atual cobre fluxos principais de autenticação, rotas base, criação de entidades, análise pedagógica, escopo por turma, vínculo professor-turma e regras principais da nova estrutura de provas.
-
 ```bash
-poetry run pytest -q
+poetry run pytest -q app/test/unit
 ```
 
-Estado atual da suíte:
+Para executar toda a suíte, incluindo testes de integração, use `poetry run pytest -q`. Verifique os serviços e a configuração exigidos pelos testes de integração antes de executá-los.
 
-- `51 passed, 1 warning`
+## Organização
 
-## Observações importantes
-
-- o backend não depende mais de `create_all()` no startup para “migrar” o banco
-- a modelagem de provas foi evoluída para suportar biblioteca/modelo e aplicação por turma
-- a suíte pode ser executada localmente com `poetry run pytest -q`, sem depender de `PYTHONPATH=.`
-- as mudanças de modelagem já feitas no código exigem migração real no PostgreSQL
-- o fluxo de OCR/correção automática já foi estabilizado, mas ainda vale aprofundar os testes dessa parte
+```text
+app/api/endpoints/    Rotas HTTP
+app/api/schemas/      Modelos de entrada e saída
+app/api/security/     Autenticação e autorização
+app/api/services/     Classificação, correção, PDFs e análises
+app/core/             Definições de Bloom, papéis e regras de domínio
+app/db/               Modelos, repositórios e dados de exemplo
+app/test/             Testes unitários e de integração
+alembic/              Migrações
+scripts/              Inicialização e experimentos de classificação
+```
 
 ## Experimento de tempo de classificação de Bloom
 
